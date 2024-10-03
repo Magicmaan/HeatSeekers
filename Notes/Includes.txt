@@ -1,0 +1,8 @@
+
+
+python
+node.js
+node-red
+
+
+https://github.com/mariocannistra/python-paho-mqtt-for-aws-iot
