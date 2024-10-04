@@ -1,6 +1,7 @@
 from paho.mqtt import client as mqtt
 from paho.mqtt import enums as mqtt_enums
 from enum import Enum
+import Templates.testpackages as pkgs
 import os   
 from awscrt import io, mqtt, auth, http
 from awsiot import mqtt_connection_builder
@@ -10,21 +11,26 @@ import json
 #https://repost.aws/knowledge-center/iot-core-publish-mqtt-messages-python
 
 
-class connectionState(Enum):
+class connectionState:
     DISCONNECTED = 0
     CONNECTED = 1
     CONNECTING = 2
-    
 
+class topics:
+    
+    
+    test = "test/testing"
+
+    
 class awtBroker:    
     #TODO
     #will take in amazon aws broker and return a connection
     def __init__(self):
+        
         self.ENDPOINT = "a1mcw1hchqljw1-ats.iot.eu-north-1.amazonaws.com"
         self.CLIENT_ID = "testDevice"
         
-        path = "E:/theob/Documents/Python Projects/HeatSeekers/aws/env/"
-        #certificates
+        path = "E:/theob/Documents/PythonProjects/HeatSeekers/aws/env/"
         self.PATH_TO_CERTIFICATE = path+"certificates/certificate.pem.crt"
         self.PATH_TO_PRIVATE_KEY = path+"certificates/private.pem.key"
         self.PATH_TO_AMAZON_ROOT_CA_1 = path+"AmazonRootCA1.pem"
@@ -32,6 +38,8 @@ class awtBroker:
         self.MESSAGE = "Hello World"
         self.TOPIC = "test/testing"
         self.RANGE = 20
+        self.packetGenerator = pkgs.packetGenerator()
+        
         self.connection = None
         self.connectionState = connectionState.DISCONNECTED
         
@@ -56,53 +64,54 @@ class awtBroker:
         
         #callbacks
         self.connection._on_connection_success_cb = self._on_connect_success
-        #self.connection._on_connection_interrupted_cb = self._on_connect_interrupted
-        #self.connection._on_connection_resumed_cb = self._on_connect_resumed
         self.connection._on_connection_closed_cb = self._on_connect_close
+        self.connection._on_connection_interrupted_cb = self._on_connect_interrupted
+        self.connection._on_connection_resumed_cb = self._on_connect_resumed
+        self.connection._on_connection_failure_cb = self._on_connect_failure
+        
         
         print(f'Connecting to {self.ENDPOINT} with client ID {self.CLIENT_ID}...')  
         # Make the connect() call
         connect_future = self.connection.connect()
-        # Future.result() waits until a result is available
-        connect_future.result()
-        print("Connected")
+        # needed to make the connection, idk why
+        connect_future.result(float(20))
+        
+        self.connectionState = connectionState.CONNECTED
         return
     
-    def disconnect(self):
-        self.connection.disconnect()
-        print("Disconnected")  
+    def disconnect(self) -> None:
+        disconnect_future = self.connection.disconnect()
+        disconnect_future.result(float(1))
     
     def isConnected(self) -> bool:
         if self.connection and self.connectionState == connectionState.CONNECTED:
             return True
         return False
     
-    def publish(self, message: str, topic: str,messageRepeat: int=20):
+    def publish(self, message: str, topic: str,messageRepeat: int=1):
         """Takes in message and posts with json format to topic"""
         if not self.isConnected():
             return
         
+        #self.logger.info(f"Publishing message: {message} to topic: {topic}")
+        
+        message = "TEST"        
+        topic = "test/testing"
         for i in range (messageRepeat):
             #assemmble message into a json
-            data = f"{message} [{i+1}]"
-            message = {"message" : data}
-            
-            
-            self.connection.publish(topic=      topic, 
-                                    payload=    json.dumps(message), 
-                                    qos=        mqtt.QoS.AT_LEAST_ONCE)
-            
+            data = self.packetGenerator.newTestPacket()
+            result = self.connection.publish(topic=      topic, 
+                                            payload=     json.dumps(data), 
+                                            qos=         mqtt.QoS.AT_LEAST_ONCE)
+        
             print("Published: '" + json.dumps(message) + "' to the topic: " + "'test/testing'")
             t.sleep(0.1)
-            
-        
     
-    
-    
-    def _on_connect_success(self, connection, data): self.connectionState = connectionState.CONNECTED
-    def _on_connect_close(self, connection, data): self.connectionState = connectionState.DISCONNECTED
-    
-    
+    def _on_connect_success(self, connection, callback_data): print("*** Connected ***\n")
+    def _on_connect_close(self, connection, callback_data): print("*** Connection Closed ***\n")
+    def _on_connect_interrupted(self, connection, callback_data): print("*** Connection interrupted ***\n")
+    def _on_connect_resumed(self, connection, callback_data): print("*** Connection Resumed ***\n")
+    def _on_connect_failure(self, connection, callback_data): print("*** Connection Failed ***\n")
 if __name__ == "__main__":
     broker = awtBroker()
     broker.publish("Hello World", "test/testing")
