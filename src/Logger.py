@@ -8,7 +8,6 @@ from tkinter import N, S, W, E
 from tkinter import messagebox
 
 import queue
-import py_hot_reload
 import tkinter as tk
 import logging
 import threading

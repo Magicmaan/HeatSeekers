@@ -1,13 +1,13 @@
 from dataclasses import asdict, dataclass
-from paho.mqtt import client as mqtt
-from paho.mqtt import enums as mqtt_enums
 from enum import Enum
-import mqtt.Templates.testpackages as pkgs
+import Templates.testpackages as pkgs
 import os   
 from awscrt import io, mqtt, auth, http
 from awsiot import mqtt_connection_builder
 import time as t
 import json
+import random
+import threading
 
 #https://repost.aws/knowledge-center/iot-core-publish-mqtt-messages-python
 
@@ -31,8 +31,8 @@ class awtConnection:
     
     Arguments:
         endpoint (str): AWS broker URL
-        cert_filepath (str): Path to certificate for Thing
-        pri_key_filepath (str): Path to private key for Thing
+        cert_filepath (str): Path to certificate for Device
+        pri_key_filepath (str): Path to private key for Device
         ca_filepath (str): Path to Amazon root CA
         client_id (str): Client ID for connection
     """
@@ -40,7 +40,7 @@ class awtConnection:
     cert_filepath:str
     pri_key_filepath:str
     ca_filepath:str
-    client_id:str = f"python_mqtt"
+    client_id:str = f"python_mqtt_{random}"
 
 
     
@@ -51,7 +51,7 @@ class awtBroker:
     #will take in amazon aws broker and return a connection
     def __init__(self):
         #DO NOT CHANGE
-        path = "E:/theob/Documents/PythonProjects/HeatSeekers/aws/env/"
+        path = "C:/Users/theob/Documents/GitHub/HeatSeekers/aws/env/"
         self.PATH_TO_CERTIFICATE = path+"dev/certificate.pem.crt"
         self.PATH_TO_PRIVATE_KEY = path+"dev/private.pem.key"
         self.PATH_TO_AMAZON_ROOT_CA_1 = path+"dev/ROOTCA1.pem"
@@ -59,6 +59,9 @@ class awtBroker:
         self.MESSAGE = "Hello World"
         self.TOPIC = "test/testing"
         self.packetGenerator = pkgs.packetGenerator()
+        
+        self.messageCount = 0
+        self.receivedMessageEvent = threading.Event()
         
         self.connection = None
         self.connectionState = connectionState.DISCONNECTED
@@ -87,7 +90,7 @@ class awtBroker:
         kwargs = asdict(self.connectArgs)
         kwargs["client_bootstrap"] = client_bootstrap
         kwargs["clean_session"] = False
-        kwargs["keep_alive_secs"] = 10
+        kwargs["keep_alive_secs"] = 600
         
         #make connection
         self.connection = mqtt_connection_builder.mtls_from_path(**kwargs)
@@ -130,8 +133,7 @@ class awtBroker:
     
     def publish(self, message: str, topic: str,messageRepeat: int=1):
         """Publish message to desired topic"""
-        if not self.isConnected():
-            return
+        assert self.isConnected()
             
         topic = topics.TEST
         data = self.packetGenerator.newTestPacket()
@@ -144,36 +146,40 @@ class awtBroker:
             t.sleep(0.1)
     
     def subscribe(self, topic: str):
-        if not self.isConnected():
-            return
+        assert self.isConnected()
         
         self.connection.subscribe(topic=topic, 
                                   qos=mqtt.QoS.AT_LEAST_ONCE, 
                                   callback=self._on_message_received)
         pass
     
+    def await_message(self,messageAmount:int=1):
+        messageAmount += self.messageCount
+        while self.messageCount != messageAmount and not self.receivedMessageEvent.is_set():
+            print("Waiting for message")
+            self.receivedMessageEvent.wait()
     #callbacks
     def _on_connect_success(self, connection, callback_data): print("*** Connected ***\n"); self.connectionState = connectionState.CONNECTED
     def _on_connect_close(self, connection, callback_data): print("*** Connection Closed ***\n"); self.connectionState = connectionState.DISCONNECTED
     def _on_connect_interrupted(self, connection, error): print("*** Connection interrupted ***\n"); print(f"Error: {error}\n")
     def _on_connect_resumed(self, connection, return_code, session_present): print("*** Connection Resumed ***\n")
     def _on_connect_failure(self, connection, callback_data): print("*** Connection Failed ***\n")
-    
     def _on_publish_success(self, connection, callback_data): 
         print("*** Publish Succeeded ***\n")
     def _on_publish_failure(self, connection, callback_data): 
         print("*** Publish Failed ***\n")
     
     def _on_message_received(self, topic, payload, dup, qos, retain, **kwargs): 
+        self.messageCount += 1
         print(f"Message received: {payload.decode()}")
         print(f"Topic: {topic}")
-        print(f"QoS: {qos}")
-        print(f"Retain: {retain}")
+        #self.receivedMessageEvent.set()
     
 if __name__ == "__main__":
     broker = awtBroker()
     broker.publish("Hello World", "test/testing")
-    broker.disconnect()
+    
+    broker.await_message(10)
     print("done")
     
     

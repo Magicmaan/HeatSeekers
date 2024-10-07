@@ -1,5 +1,3 @@
-from paho.mqtt import client as mqtt
-from paho.mqtt import enums as mqtt_enums
 from enum import Enum
 import os   
 from awscrt import io, mqtt, auth, http
