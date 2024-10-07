@@ -1,5 +1,4 @@
-from paho.mqtt import client as mqtt
-from paho.mqtt import enums as mqtt_enums
+
 import os
 from mqtt.awtBroker import awtBroker
 from setupProgram import setupProgram

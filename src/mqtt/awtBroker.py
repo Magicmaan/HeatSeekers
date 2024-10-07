@@ -1,13 +1,14 @@
-from dataclasses import asdict, dataclass
-from enum import Enum
-import Templates.testpackages as pkgs
-import os   
+from . import awtConnection
 from awscrt import io, mqtt, auth, http
 from awsiot import mqtt_connection_builder
+from .Templates import packetGenerator
+from dataclasses import asdict
+import os   
 import time as t
 import json
 import random
 import threading
+
 
 #https://repost.aws/knowledge-center/iot-core-publish-mqtt-messages-python
 
@@ -23,24 +24,6 @@ class topics:
 class endpoints:
     EU = "a1mcw1hchqljw1-ats.iot.eu-north-1.amazonaws.com"
     DEFAULT = EU
-
-@dataclass
-class awtConnection:
-    """
-    Class for AWS connection settings
-    
-    Arguments:
-        endpoint (str): AWS broker URL
-        cert_filepath (str): Path to certificate for Device
-        pri_key_filepath (str): Path to private key for Device
-        ca_filepath (str): Path to Amazon root CA
-        client_id (str): Client ID for connection
-    """
-    endpoint:str
-    cert_filepath:str
-    pri_key_filepath:str
-    ca_filepath:str
-    client_id:str = f"python_mqtt_{random}"
 
 
     
@@ -58,7 +41,7 @@ class awtBroker:
         
         self.MESSAGE = "Hello World"
         self.TOPIC = "test/testing"
-        self.packetGenerator = pkgs.packetGenerator()
+        self.packetGenerator = packetGenerator()
         
         self.messageCount = 0
         self.receivedMessageEvent = threading.Event()
@@ -100,7 +83,7 @@ class awtBroker:
         self.connection._on_connection_success_cb = self._on_connect_success
         self.connection._on_connection_closed_cb = self._on_connect_close
         self.connection._on_connection_interrupted_cb = self._on_connect_interrupted
-        self.connection._on_connection_resumed = self._on_connect_resumed
+        self.connection._on_connection_resumed_cb = self._on_connect_resumed
         self.connection._on_connection_failure_cb = self._on_connect_failure
         
         # Make the connect() call
@@ -181,5 +164,4 @@ if __name__ == "__main__":
     
     broker.await_message(10)
     print("done")
-    
     

@@ -10,7 +10,6 @@ from tkinterdnd2 import DND_FILES, DND_TEXT, DND_ALL, TkinterDnD
 
 from Util.pingIP import pingIP
 import queue
-import py_hot_reload
 import tkinter as tk
 import logging
 import threading
@@ -19,7 +18,7 @@ import os
 class setupProgram(ttk.Frame):
     DATA_PATH:str = f"{os.getenv('APPDATA')}/HeatSeekers"
     
-    clientname_blacklist_chars:str = '/\:*?"<>|,;\'{}[]()!@#$%^&*+`~ -'
+    clientname_blacklist_chars:str = '/\:*?"<>|,;{}[]()!@#$%^&*+`~ -'
     def __init__(self, root: Widget=None):
         if not root:
             root = TkinterDnD.Tk()
