@@ -1,15 +1,23 @@
-
+import time
+from . import DATA_PATH
+from . import setupProgram
 import os
-from mqtt.awtBroker import awtBroker
-from setupProgram import setupProgram
+from mqtt import awtBroker, pingIP
+
 
             
 
 class Program:
-    DATA_PATH:str = f"{os.getenv('APPDATA', '')}/HeatSeekers"
+    #singleton instance
+    __instance = None
+    def __new__(cls):
+        if not hasattr(cls, '__ins'):
+            print("Instance creating...")
+            cls.__ins = super().__new__(cls)
+        return cls.__ins
     
     def __init__(self):
-        if not os.path.exists(self.DATA_PATH):
+        if not os.path.exists(DATA_PATH):
             print("Setting up app")
             self.setupApp()
         else:
@@ -18,43 +26,44 @@ class Program:
         
         self.awtBroker = awtBroker()
         
+        self.startTime:float = time.time()
+        
         self.run()
     
-    
+    def getRuntime(self) -> float:
+        """Get the runtime of the program"""
+        return time.time() - self.startTime
         
-    def run(self):
-        self.client.loop_forever()
-    
+        
     def setupApp(self):
-        #HeatSeekers
-        # /mqtt
-        #  host.txt
-        #  /certs
-        #    certificate.pem.crt
-        #    private.pem.key
-        #    ROOTCA1.pem
-        #
-        # /data
-        #  /logs
-        #  /device_name
-        #    /temperature_data
-        #    /humidity_data
-        os.mkdir(self.DATA_PATH)
-        
-        os.mkdir(f'{self.DATA_PATH}/mqtt')
-        os.mkdir(f'{self.DATA_PATH}/mqtt/certs')
-        
-        os.mkdir(f'{self.DATA_PATH}/data')
-        os.mkdir(f'{self.DATA_PATH}/data/logs')
-        
         setup_program = setupProgram()
         
-    def verifyAppData(self):
+    def verifyAppData(self) -> bool:
+        isVerified = False
         #TODO
+        if os.path.exists(f"{DATA_PATH}/mqtt/host.txt"):
+            with open(f"{DATA_PATH}/mqtt/host.txt", 'r') as f:
+                pingIP
+        else:
+            print("No host.txt")
+            isVerified = True
+
+        if os.path.exists(f"{DATA_PATH}/mqtt/certs/certificate.pem.crt"):
+            with open(f"{DATA_PATH}/mqtt/certs/certificate.pem.crt", 'r') as f:
+                content = f.read()
+                print(content)
+        
         #verify that the app data is correct
         #verify hardware can be accessed
         #verify that the mqtt connection can be made
-        return
+        
+        
+        
+        #else:
+        #    print("Setting up app")
+        #    self.setupApp()
+        
+        return False
 
 if __name__ == "__main__":
     Program()

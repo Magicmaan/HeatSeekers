@@ -1,5 +1,6 @@
-from .testpackages import packetGenerator
+from .testpackages import newPacket, newTestPacket
 
 __all__ = [
-    'packetGenerator'
+    'newPacket',
+    'newTestPacket',
 ]

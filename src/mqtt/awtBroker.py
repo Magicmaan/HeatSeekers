@@ -1,8 +1,8 @@
-from . import awtConnection
+from program import DATA_PATH
 from awscrt import io, mqtt, auth, http
 from awsiot import mqtt_connection_builder
-from .Templates import packetGenerator
-from dataclasses import asdict
+from .Templates import *
+from dataclasses import asdict, dataclass
 import os   
 import time as t
 import json
@@ -11,7 +11,23 @@ import threading
 
 
 #https://repost.aws/knowledge-center/iot-core-publish-mqtt-messages-python
-
+@dataclass
+class awtConnection:
+    """
+    Class for AWS connection settings
+    
+    Arguments:
+        endpoint (str): AWS broker URL
+        cert_filepath (str): Path to certificate for Device
+        pri_key_filepath (str): Path to private key for Device
+        ca_filepath (str): Path to Amazon root CA
+        client_id (str): Client ID for connection
+    """
+    endpoint:str
+    cert_filepath:str
+    pri_key_filepath:str
+    ca_filepath:str
+    client_id:str = f"python_mqtt"
 
 class connectionState:
     DISCONNECTED = 0
@@ -20,28 +36,22 @@ class connectionState:
 
 class topics:
     TEST = "test/testing"
-    
-class endpoints:
-    EU = "a1mcw1hchqljw1-ats.iot.eu-north-1.amazonaws.com"
-    DEFAULT = EU
 
 
     
 class awtBroker:   
-    DATA_PATH:str = f"{os.getenv('APPDATA', '')}/HeatSeekers"
-     
     #TODO
     #will take in amazon aws broker and return a connection
     def __init__(self):
         #DO NOT CHANGE
-        path = "C:/Users/theob/Documents/GitHub/HeatSeekers/aws/env/"
-        self.PATH_TO_CERTIFICATE = path+"dev/certificate.pem.crt"
-        self.PATH_TO_PRIVATE_KEY = path+"dev/private.pem.key"
-        self.PATH_TO_AMAZON_ROOT_CA_1 = path+"dev/ROOTCA1.pem"
+        path = f"{DATA_PATH}/mqtt/certs"
+        self.PATH_TO_HOST = f"{DATA_PATH}/mqtt/host.txt"
+        self.PATH_TO_CERTIFICATE = f"{path}certificate.pem.crt"
+        self.PATH_TO_PRIVATE_KEY = f"{path}private.pem.key"
+        self.PATH_TO_AMAZON_ROOT_CA_1 = path+"ROOTCA1.pem"
         
         self.MESSAGE = "Hello World"
         self.TOPIC = "test/testing"
-        self.packetGenerator = packetGenerator()
         
         self.messageCount = 0
         self.receivedMessageEvent = threading.Event()
@@ -49,7 +59,9 @@ class awtBroker:
         self.connection = None
         self.connectionState = connectionState.DISCONNECTED
         
-        self.connectArgs = awtConnection(endpoints.DEFAULT, 
+        #connection settings
+        #contains the host name, and certificates for IOT connection
+        self.connectArgs = awtConnection(self.PATH_TO_HOST, 
                                          self.PATH_TO_CERTIFICATE, 
                                          self.PATH_TO_PRIVATE_KEY, 
                                          self.PATH_TO_AMAZON_ROOT_CA_1, 
@@ -119,7 +131,7 @@ class awtBroker:
         assert self.isConnected()
             
         topic = topics.TEST
-        data = self.packetGenerator.newTestPacket()
+        data = newTestPacket()
         for i in range (messageRepeat):
             #assemmble message into a json
             result = self.connection.publish(topic=      topic, 

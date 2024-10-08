@@ -8,23 +8,23 @@ from tkinter import N, S, W, E
 from tkinter import messagebox
 from tkinterdnd2 import DND_FILES, DND_TEXT, DND_ALL, TkinterDnD
 
-from Util.pingIP import pingIP
+from mqtt import pingIP
 import queue
 import tkinter as tk
 import logging
 import threading
 import os
 
-class setupProgram(ttk.Frame):
-    DATA_PATH:str = f"{os.getenv('APPDATA')}/HeatSeekers"
-    
+class SetupProgram(ttk.Frame):
     clientname_blacklist_chars:str = '/\:*?"<>|,;{}[]()!@#$%^&*+`~ -'
     def __init__(self, root: Widget=None):
+        self.DATA_PATH:str = f"{os.getenv('APPDATA', '')}/HeatSeekers"
         if not root:
             root = TkinterDnD.Tk()
             root.title("Setup")
         super().__init__(root,padding=10)
         self.root = root
+        
         
         self.setupGUI()
         self.setupDragDrop()
@@ -39,8 +39,9 @@ class setupProgram(ttk.Frame):
         
         ttk.Label(self, text="Hostname:").pack()
         self.hostname = ttk.Entry(self, width=75); self.hostname.pack()
+        test = ttk.Label(self.hostname, text="Drag and drop files here")
         
-        ttk.Label(self, text="Client Name:").pack()
+        ttk.Label(self, text="Device Name:").pack()
         self.clientname = ttk.Entry(self, width=75); self.clientname.pack()
         
         ttk.Label(self, text="Certificate:").pack()
@@ -55,13 +56,20 @@ class setupProgram(ttk.Frame):
         ttk.Button(self, text="Confirm",command=self.on_confirm).pack()
     
     def setupDirectory(self):
-        os.mkdir(self.DATA_PATH)
+        if not os.path.exists(self.DATA_PATH):
+            os.makedirs(self.DATA_PATH)
         
-        os.mkdir(f'{self.DATA_PATH}/mqtt')
-        os.mkdir(f'{self.DATA_PATH}/mqtt/certs')
+        if not os.path.exists(f'{self.DATA_PATH}/mqtt'):
+            os.makedirs(f'{self.DATA_PATH}/mqtt')
         
-        os.mkdir(f'{self.DATA_PATH}/data')
-        os.mkdir(f'{self.DATA_PATH}/data/logs')
+        if not os.path.exists(f'{self.DATA_PATH}/mqtt/certs'):
+            os.makedirs(f'{self.DATA_PATH}/mqtt/certs')
+        
+        if not os.path.exists(f'{self.DATA_PATH}/data'):
+            os.makedirs(f'{self.DATA_PATH}/data')
+        
+        if not os.path.exists(f'{self.DATA_PATH}/data/logs'):
+            os.makedirs(f'{self.DATA_PATH}/data/logs')
     
     def saveData(self, hostname:str, clientname:str, certPath:str, keyPath:str, caPath:str):
         with open(f'{self.DATA_PATH}/mqtt/host.txt', 'w') as f:
@@ -78,10 +86,14 @@ class setupProgram(ttk.Frame):
         
         with open(f'{self.DATA_PATH}/mqtt/topics.txt', 'w') as f:
             f.write(clientname)
+        os.makedirs(f'{self.DATA_PATH}/data/logs')
         
-        os.mkdir(f'{self.DATA_PATH}/data/{clientname}')  
-        os.mkdir(f'{self.DATA_PATH}/data/{clientname}/temperature_data')
-        os.mkdir(f'{self.DATA_PATH}/data/{clientname}/humidity_data')
+        if not os.path.exists(f'{self.DATA_PATH}/data/{clientname}'):
+            os.makedirs(f'{self.DATA_PATH}/data/{clientname}')  
+        if not os.path.exists(f'{self.DATA_PATH}/data/{clientname}/temperature_data'):
+            os.makedirs(f'{self.DATA_PATH}/data/{clientname}/temperature_data')
+        if not os.path.exists(f'{self.DATA_PATH}/data/{clientname}/humidity_data'):
+            os.makedirs(f'{self.DATA_PATH}/data/{clientname}/humidity_data')
     
     def setupDragDrop(self):
         self.clientname.drop_target_register(DND_FILES)
@@ -112,17 +124,17 @@ class setupProgram(ttk.Frame):
         f = self.getDropFileContents(event)
         if f:
             self.certPath.delete(0, END)
-            self.certPath.insert(0, f.read())
+            self.certPath.insert(0, f)
     def drop_keyPath(self, event):
         f = self.getDropFileContents(event)
         if f:
             self.keyPath.delete(0, END)
-            self.keyPath.insert(0, f.read())
+            self.keyPath.insert(0, f)
     def drop_caPath(self, event):
         f = self.getDropFileContents(event)
         if f:
             self.caPath.delete(0, END)
-            self.caPath.insert(0, f.read())
+            self.caPath.insert(0, f)
     def getDropFileContents(self, event) -> str:
         """get text contents of dropped file"""
         filename = event.data
@@ -176,5 +188,5 @@ class setupProgram(ttk.Frame):
         self.saveData(self.hostname.get(), self.clientname.get(), self.certPath.get(), self.keyPath.get(), self.caPath.get())
         self.root.destroy()
         
-        
-m = setupProgram()
+if __name__ == "__main__":
+    SetupProgram()
