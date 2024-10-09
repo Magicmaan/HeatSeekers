@@ -2,7 +2,7 @@ from threading import Thread
 import time
 from . import DIRECTORIES,DATA_PATH, FILES
 from . import SetupProgram
-from .Logger import Logger
+from Logger import CustomLogger, LoggerUI
 import os
 from mqtt import awtBroker, awtConnection, pingIP
 
@@ -21,7 +21,11 @@ class Program:
     def __init__(self):
         SetupProgram()
         self.startTime:float = time.time()
-        self.logger = Logger(DIRECTORIES.LOGS_PATH)
+        
+        customLogger = CustomLogger()
+        
+        self.logger = LoggerUI(None, customLogger)
+        
         print("Logger created")
         
         
@@ -47,8 +51,9 @@ class Program:
         self.mainThread = Thread(target=self.start)
         
         
-        self.logger.start()
+        
         self.mainThread.start()
+        self.logger.start()
         
         
         

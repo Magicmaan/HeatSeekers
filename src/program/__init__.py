@@ -25,7 +25,6 @@ from .program import Program
 
 __all__ = [
     'Program',
-    'Logger',
     'DIRECTORIES',
     'FILES',
     'DATA_PATH',

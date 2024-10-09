@@ -6,8 +6,10 @@ from tkinter import scrolledtext
 from tkinter import Widget
 from tkinter import N, S, W, E
 from tkinter import messagebox
-
+from program import DIRECTORIES
+from . import QueueHandler
 import queue
+from logging import LogRecord
 import py_hot_reload
 import tkinter as tk
 import logging
@@ -26,41 +28,31 @@ import threading
 # log levels
 
 
-logger = logging.getLogger("AWS")
+logger = logging.getLogger()
 
-LOG_PATH:str = "/data/logs/"
-
-class QueueHandler(logging.Handler):
-    """Class to send logging records to a queue
-
-    It can be used from different threads
-    """
-    def __init__(self, log_queue):
-        super().__init__()
-        self.log_queue = log_queue
-
-    def emit(self, record):
-        self.log_queue.put(record)
- 
 class LoggerUI():
+    LOG_PATH:str = DIRECTORIES.LOGS_PATH
     #TODO: SPLIT THE LOGGER AND THE UI
-    def __init__(self, root: Widget, Logger:logging.Logger):
+    def __init__(self, root: Widget=None, parentLogger=None):
+        if not root:
+            root = Tk()
         self.root = root
         self.frame = ttk.Frame(self.root, padding=10)
         self.frame.grid(column=0, row=0, sticky=(N, S, W, E))
         
+        self.parentLogger = parentLogger
+        
         self.setupWindow()
-        self.setupLogger()
         
         #self.start()
     
     def start(self):
-        
         self.root.mainloop()
     
     def display(self, record):
         #take in string and display to window
-        msg = self.queue_handler.format(record)
+        msg = self.parentLogger.queueHandler.format(record)
+        
         self.scrollPane.configure(state='normal')
         self.scrollPane.insert(END, msg + '\n', record.levelname)
         self.scrollPane.configure(state='disabled')
@@ -70,15 +62,15 @@ class LoggerUI():
     def setupLogger(self):
         # Create a custom logger
         self.logger = logging.getLogger()
-        self.logger.setLevel(logging.DEBUG)
         
         self.log_queue = queue.Queue()
         self.queue_handler = QueueHandler(self.log_queue)
+        logger.addHandler(self.queue_handler)
         
         # Create a handler for the logger
         formatter = logging.Formatter(datefmt='%H:%M:%S', fmt='%(asctime)s %(name)s - %(levelname)s - %(message)s')
         self.queue_handler.setFormatter(formatter)
-        self.logger.addHandler(self.queue_handler)
+        
         
         
         
@@ -90,9 +82,9 @@ class LoggerUI():
     
     def showFileName(self,bool:bool):
         if bool:
-            self.queue_handler.setFormatter(logging.Formatter(datefmt='%H:%M:%S', fmt='%(asctime)s %(name)s - %(levelname)s - %(message)s'))
+            self.logger.queue_handler.setFormatter(logging.Formatter(datefmt='%H:%M:%S', fmt='%(asctime)s %(name)s - %(levelname)s - %(message)s'))
         else:
-            self.queue_handler.setFormatter(logging.Formatter(datefmt='%H:M:S', fmt='%(name)s - %(levelname)s - %(message)s'))
+            self.logger.queue_handler.setFormatter(logging.Formatter(datefmt='%H:M:S', fmt='%(name)s - %(levelname)s - %(message)s'))
     
     def setupWindow(self):
         # Create a frame for the top bar
@@ -138,7 +130,7 @@ class LoggerUI():
         # Check every 100ms if there is a new message in the queue to display
         while True:
             try:
-                record = self.log_queue.get(block=False)
+                record = self.logger.logQueue.get(block=False)
             except queue.Empty:
                 break
             else:
@@ -146,37 +138,44 @@ class LoggerUI():
                 self.display(record)
         self.frame.after(100, self.poll_log_queue)
         
-    
-
     def log(self):
-        self.logger.debug('debug message')
-        self.logger.info('info message')
-        self.logger.warning('warning message')
-        self.logger.error('error message')
-        self.logger.critical('critical message')
+        logger.debug('debug message')
+        logger.info('info message')
+        logger.warning('warning message')
+        logger.error('error message')
+        logger.critical('critical message')
 
-class Logger():
-    def __init__(self, logPath:str, showGUI:bool=True):
+class CustomLogger():
+    def __init__(self, logPath:str=None, showGUI:bool=True):
         self.root = Tk()
         self.showGUI = True
-        self.logger = logging.getLogger()
+        
+        self.logQueue = queue.Queue()
+        self.queueHandler = QueueHandler(self.logQueue)
+        
+        self.setFormatter(logging.Formatter(datefmt='%H:%M:%S', fmt='%(asctime)s %(name)s - %(levelname)s - %(message)s'))
+        self.addHandler(self.queueHandler)
         
         
-        self.GUI = LoggerUI(self.root, self.logger)
+        self.GUI = LoggerUI(self.root, self)
         #calls self.start()
-        
-        
         print("Started logger")  
+
+    def setFormatter(self, formatter:logging.Formatter):
+        assert isinstance(formatter, logging.Formatter), f"formatter is not a logging.Formatter, it is a {type(formatter)}"
+        assert self.queueHandler is not None
+        self.queueHandler.setFormatter(formatter)
     
-    def start(self):
-        self.GUI.start()
+    def addHandler(self, handler:logging.Handler):
+        assert isinstance(handler, logging.Handler), f"handler is not a logging.Handler, it is a {type(handler)}"
+        logger.addHandler(handler)
     
     def testLog(self):
-        self.logger.debug('debug message')
-        self.logger.info('info message')
-        self.logger.warning('warning message')
-        self.logger.error('error message')
-        self.logger.critical('critical message')
+        logger.debug('debug message')
+        logger.info('info message')
+        logger.warning('warning message')
+        logger.error('error message')
+        logger.critical('critical message')
 
 def main():
     root = Tk()
