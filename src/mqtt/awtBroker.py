@@ -8,13 +8,15 @@ import time as t
 import json
 import random
 import threading
+from logging import getLogger
 
 
+logger = getLogger("AwtBroker")
 #https://repost.aws/knowledge-center/iot-core-publish-mqtt-messages-python
 @dataclass
 class awtConnection:
     """
-    Class for AWS connection settings
+    Class for AWT connection settings
     
     Arguments:
         endpoint (str): AWS broker URL
@@ -34,48 +36,48 @@ class connectionState:
     CONNECTED = 1
     CONNECTING = 2
 
-class topics:
-    TEST = "test/testing"
 
 
     
 class awtBroker:   
+    """Class for AWT Broker connection
+    
+        If connection settings are provided, will connect on creation\n
+        Otherwise, will need to call setConnectionArgs() then connect() to connect
+    """
     #TODO
     #will take in amazon aws broker and return a connection
-    def __init__(self):
-        #DO NOT CHANGE
-        path = f"{DATA_PATH}/mqtt/certs"
-        self.PATH_TO_HOST = f"{DATA_PATH}/mqtt/host.txt"
-        self.PATH_TO_CERTIFICATE = f"{path}certificate.pem.crt"
-        self.PATH_TO_PRIVATE_KEY = f"{path}private.pem.key"
-        self.PATH_TO_AMAZON_ROOT_CA_1 = path+"ROOTCA1.pem"
+    def __init__(self, connectArgs:awtConnection=None, autoStart:bool=False):
+        self.connectArgs = None
+        if connectArgs:
+            self.connectArgs = connectArgs
+        else:
+            print("No connection args provided")
         
+
         self.MESSAGE = "Hello World"
         self.TOPIC = "test/testing"
         
+        
         self.messageCount = 0
+        #setup threading event for when message is received
         self.receivedMessageEvent = threading.Event()
         
         self.connection = None
         self.connectionState = connectionState.DISCONNECTED
         
-        #connection settings
-        #contains the host name, and certificates for IOT connection
-        self.connectArgs = awtConnection(self.PATH_TO_HOST, 
-                                         self.PATH_TO_CERTIFICATE, 
-                                         self.PATH_TO_PRIVATE_KEY, 
-                                         self.PATH_TO_AMAZON_ROOT_CA_1, 
-                                         )
-        
-        self.connect()
-        
-        self.subscribe(self.TOPIC)
+        if self.connectArgs:
+            if autoStart:
+                self.connect()
+                
+                
+                self.subscribe(self.TOPIC)
     
-    def connect(self, connectArgs:awtConnection=None):
-        if not connectArgs:
-            if not self.connectArgs:
-                return
-            connectArgs = self.connectArgs
+    def connect(self) -> None:
+        """Connect to AWS broker\n
+        Uses the connection settings provided to object"""
+        assert not self.isConnected(), "Already connected"
+        assert self.connectArgs, "No connection args provided"
         
         event_loop_group = io.EventLoopGroup(1)
         host_resolver = io.DefaultHostResolver(event_loop_group)
@@ -83,13 +85,14 @@ class awtBroker:
         
         #unpack connection settings
         kwargs = asdict(self.connectArgs)
+        
         kwargs["client_bootstrap"] = client_bootstrap
         kwargs["clean_session"] = False
         kwargs["keep_alive_secs"] = 600
         
         #make connection
         self.connection = mqtt_connection_builder.mtls_from_path(**kwargs)
-        print(f'Connecting to {kwargs["endpoint"]} with client ID {kwargs["client_id"]}...')  
+        logger.info(f'Connecting to {kwargs["endpoint"]} with client ID {kwargs["client_id"]}...')
         
         #callbacks
         self.connection._on_connection_success_cb = self._on_connect_success
@@ -104,7 +107,6 @@ class awtBroker:
         connect_future.result(float(20))
         
         self.connectionState = connectionState.CONNECTED
-    
     
     def disconnect(self) -> None:
         disconnect_future = self.connection.disconnect()
@@ -124,51 +126,61 @@ class awtBroker:
         return self.connectArgs
     
     def setConnectionArgs(self, connectArgs:awtConnection):
+        assert not self.isConnected(), "Cannot change connection settings while connected"
         self.connectArgs = connectArgs
     
     def publish(self, message: str, topic: str,messageRepeat: int=1):
         """Publish message to desired topic"""
-        assert self.isConnected()
-            
-        topic = topics.TEST
+        assert self.isConnected(), "Not connected"
+        assert messageRepeat > 0
+        assert topic != ""
+
         data = newTestPacket()
         for i in range (messageRepeat):
             #assemmble message into a json
             result = self.connection.publish(topic=      topic, 
                                             payload=     json.dumps(data), 
-                                            qos=         mqtt.QoS.AT_LEAST_ONCE)
-            print("Published: '" + json.dumps(message) + "' to the topic: " + "'test/testing'")
-            t.sleep(0.1)
+                                            qos=         mqtt.QoS.AT_LEAST_ONCE,)
+            logger.info(f"Publishing message to {topic}")
+            result[0].add_done_callback(self._on_publish_success)
     
     def subscribe(self, topic: str):
         assert self.isConnected()
-        
         self.connection.subscribe(topic=topic, 
                                   qos=mqtt.QoS.AT_LEAST_ONCE, 
                                   callback=self._on_message_received)
         pass
     
     def await_message(self,messageAmount:int=1):
+        assert self.isConnected(), "Not connected"
         messageAmount += self.messageCount
-        while self.messageCount != messageAmount and not self.receivedMessageEvent.is_set():
+        while self.messageCount != messageAmount or not self.receivedMessageEvent.is_set():
             print("Waiting for message")
-            self.receivedMessageEvent.wait()
+            self.receivedMessageEvent.wait(1)
+            self.receivedMessageEvent.clear()
     #callbacks
-    def _on_connect_success(self, connection, callback_data): print("*** Connected ***\n"); self.connectionState = connectionState.CONNECTED
-    def _on_connect_close(self, connection, callback_data): print("*** Connection Closed ***\n"); self.connectionState = connectionState.DISCONNECTED
-    def _on_connect_interrupted(self, connection, error): print("*** Connection interrupted ***\n"); print(f"Error: {error}\n")
-    def _on_connect_resumed(self, connection, return_code, session_present): print("*** Connection Resumed ***\n")
-    def _on_connect_failure(self, connection, callback_data): print("*** Connection Failed ***\n")
-    def _on_publish_success(self, connection, callback_data): 
-        print("*** Publish Succeeded ***\n")
+    def _on_connect_success(self, connection, callback_data): logger.info("*** Connected ***\n"); self.connectionState = connectionState.CONNECTED
+    def _on_connect_close(self, connection, callback_data): logger.info("*** Connection Closed ***\n"); self.connectionState = connectionState.DISCONNECTED
+    def _on_connect_interrupted(self, connection, error): logger.error("*** Connection interrupted ***\n"); print(f"Error: {error}\n")
+    def _on_connect_resumed(self, connection, return_code, session_present): logger.info("*** Connection Resumed ***\n")
+    def _on_connect_failure(self, connection:mqtt.Connection, callback_data): 
+        logger.error("*** Connection Failed ***\n")
+        print(connection.host_name)
+    def _on_publish_success(self, future):
+        try:
+            future.result()
+            logger.info("Publish successful")
+        except Exception as e:
+            pass
+    
     def _on_publish_failure(self, connection, callback_data): 
-        print("*** Publish Failed ***\n")
+        logger.error(f"Publish failed: {connection.host_name}")
     
     def _on_message_received(self, topic, payload, dup, qos, retain, **kwargs): 
         self.messageCount += 1
         print(f"Message received: {payload.decode()}")
         print(f"Topic: {topic}")
-        #self.receivedMessageEvent.set()
+        self.receivedMessageEvent.set()
     
 if __name__ == "__main__":
     broker = awtBroker()

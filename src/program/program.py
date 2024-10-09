@@ -1,8 +1,10 @@
+from threading import Thread
 import time
-from . import DATA_PATH
-from . import setupProgram
+from . import DIRECTORIES,DATA_PATH, FILES
+from . import SetupProgram
+from .Logger import Logger
 import os
-from mqtt import awtBroker, pingIP
+from mqtt import awtBroker, awtConnection, pingIP
 
 
             
@@ -17,53 +19,62 @@ class Program:
         return cls.__ins
     
     def __init__(self):
-        if not os.path.exists(DATA_PATH):
-            print("Setting up app")
-            self.setupApp()
-        else:
-            self.verifyAppData()
+        SetupProgram()
+        self.startTime:float = time.time()
+        self.logger = Logger(DIRECTORIES.LOGS_PATH)
+        print("Logger created")
+        
+        
+        
+
+        #get app data
+        #includes connection data, etc
         self.getAppData()
         
-        self.awtBroker = awtBroker()
+        #create connection object containing the data
+        self.awtConnection = awtConnection(
+            self.host,
+            self.cert,
+            self.privateKey,
+            self.rootCA
+        )
         
-        self.startTime:float = time.time()
+        self.awtBroker = awtBroker(self.awtConnection, autoStart=True)
+        self.awtBroker.publish("Hello World", "test/testing")
+
         
-        self.run()
+        self.loggerThread = Thread(target=self.logger.start)
+        self.mainThread = Thread(target=self.start)
+        
+        
+        self.logger.start()
+        self.mainThread.start()
+        
+        
+        
+    def start(self):
+        """Start the program"""
+        print("Program started")
+        self.awtBroker.await_message(-1)
+        pass
+
     
     def getRuntime(self) -> float:
         """Get the runtime of the program"""
         return time.time() - self.startTime
         
+    def getAppData(self):
+        files = FILES()
+        self.host, self.cert, self.privateKey, self.rootCA = None, None, None, None
         
-    def setupApp(self):
-        setup_program = setupProgram()
+        with open(files.HOST, 'r') as f:
+            self.host = f.read()
+        self.cert = files.CERTIFICATE
+        self.privateKey = files.PRIVATE_KEY
+        self.rootCA = files.ROOT_CA
         
-    def verifyAppData(self) -> bool:
-        isVerified = False
-        #TODO
-        if os.path.exists(f"{DATA_PATH}/mqtt/host.txt"):
-            with open(f"{DATA_PATH}/mqtt/host.txt", 'r') as f:
-                pingIP
-        else:
-            print("No host.txt")
-            isVerified = True
+        
 
-        if os.path.exists(f"{DATA_PATH}/mqtt/certs/certificate.pem.crt"):
-            with open(f"{DATA_PATH}/mqtt/certs/certificate.pem.crt", 'r') as f:
-                content = f.read()
-                print(content)
-        
-        #verify that the app data is correct
-        #verify hardware can be accessed
-        #verify that the mqtt connection can be made
-        
-        
-        
-        #else:
-        #    print("Setting up app")
-        #    self.setupApp()
-        
-        return False
 
 if __name__ == "__main__":
     Program()

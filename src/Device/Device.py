@@ -20,6 +20,5 @@ class Device:
     def getHumidity(self) -> list:
         return self.data["humidity"]
     
-    def addTemperature(self, temperature: float):
-        self.data["temperature"].append(temperature)
+    
     

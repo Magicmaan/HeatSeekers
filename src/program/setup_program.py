@@ -1,24 +1,27 @@
 from tkinter import ttk
 from tkinter import Tk
 from tkinter import END
-from tkinter import Text
-from tkinter import scrolledtext
 from tkinter import Widget
 from tkinter import N, S, W, E
 from tkinter import messagebox
-from tkinterdnd2 import DND_FILES, DND_TEXT, DND_ALL, TkinterDnD
-
+from tkinterdnd2 import DND_FILES, TkinterDnD
 from mqtt import pingIP
-import queue
-import tkinter as tk
-import logging
-import threading
+from dataclasses import astuple
+from . import DIRECTORIES, FILES
 import os
+
+class SETUP_STATE:
+    SETUP = 0
+    VERIFY = 1
+    COMPLETE = 2
 
 class SetupProgram(ttk.Frame):
     clientname_blacklist_chars:str = '/\:*?"<>|,;{}[]()!@#$%^&*+`~ -'
+    directories = astuple(DIRECTORIES())
+    files = astuple(FILES())
+    
+    
     def __init__(self, root: Widget=None):
-        self.DATA_PATH:str = f"{os.getenv('APPDATA', '')}/HeatSeekers"
         if not root:
             root = TkinterDnD.Tk()
             root.title("Setup")
@@ -26,12 +29,62 @@ class SetupProgram(ttk.Frame):
         self.root = root
         
         
+        self.setupState = SETUP_STATE.VERIFY
+        
+        appDataState, missingDirectories, missingFiles = self.verifyAppData()
+        if appDataState:
+            self.setupState = SETUP_STATE.COMPLETE
+        else:
+            self.setupState = SETUP_STATE.SETUP
+        
+        if self.setupState == SETUP_STATE.COMPLETE:
+            return
+        
+        
         self.setupGUI()
         self.setupDragDrop()
-        
         root.geometry("500x300")
         self.pack()
         self.mainloop()
+    
+    def verifyAppData(self) -> tuple[bool, list[str], list[str]]:
+        """Verify that all directories and files exist\n
+        Returns a tuple of (isVerified, missingDirectories, missingFiles)"""
+        isVerified = True
+        missingDirectories = []
+        missingFiles = []
+        
+        verifiedDirectory, missingDirectories = self.verifyDirectory()
+        if not verifiedDirectory:
+            print(f"Missing directories: {missingDirectories}")
+            isVerified = False
+        
+        verifiedFiles, missingFiles = self.verifyFiles()
+        if not verifiedFiles:
+            print(f"Missing files: {missingFiles}")
+            isVerified = False
+        
+        return isVerified, missingDirectories, missingFiles
+
+    def verifyDirectory(self) -> tuple[bool, list[str]]:
+        """Verify that all directories exist\n
+        Returns a tuple of (isVerified, missingDirectories)"""
+        missingDirectories = []
+        for d in self.directories:
+            if not os.path.exists(d):
+                missingDirectories.append(d)
+                
+        return (len(missingDirectories) == 0, missingDirectories)
+
+    def verifyFiles(self) -> tuple[bool, list[str]]:
+        """Verify that all files exist\n
+        Returns a tuple of (isVerified, missingFiles)"""
+        missingFiles = []
+        for f in self.files:
+            if not os.path.exists(f):
+                missingFiles.append(f)
+                
+        return (len(missingFiles) == 0, missingFiles)
     
     def setupGUI(self):
         self.root.resizable(False, False)
@@ -56,44 +109,35 @@ class SetupProgram(ttk.Frame):
         ttk.Button(self, text="Confirm",command=self.on_confirm).pack()
     
     def setupDirectory(self):
-        if not os.path.exists(self.DATA_PATH):
-            os.makedirs(self.DATA_PATH)
-        
-        if not os.path.exists(f'{self.DATA_PATH}/mqtt'):
-            os.makedirs(f'{self.DATA_PATH}/mqtt')
-        
-        if not os.path.exists(f'{self.DATA_PATH}/mqtt/certs'):
-            os.makedirs(f'{self.DATA_PATH}/mqtt/certs')
-        
-        if not os.path.exists(f'{self.DATA_PATH}/data'):
-            os.makedirs(f'{self.DATA_PATH}/data')
-        
-        if not os.path.exists(f'{self.DATA_PATH}/data/logs'):
-            os.makedirs(f'{self.DATA_PATH}/data/logs')
+        for d in self.directories:
+            if not os.path.exists(d):
+                os.makedirs(d,exist_ok=True)
     
     def saveData(self, hostname:str, clientname:str, certPath:str, keyPath:str, caPath:str):
-        with open(f'{self.DATA_PATH}/mqtt/host.txt', 'w') as f:
+        with open(FILES.HOST, 'w') as f:
             f.write(hostname)
         
-        with open(f'{self.DATA_PATH}/mqtt/certs/certificate.pem.crt', 'w') as f:
+        with open(FILES.CERTIFICATE, 'w') as f:
             f.write(certPath)
         
-        with open(f'{self.DATA_PATH}/mqtt/certs/private.pem.key', 'w') as f:
+        with open(FILES.PRIVATE_KEY, 'w') as f:
             f.write(keyPath)
         
-        with open(f'{self.DATA_PATH}/mqtt/certs/ROOTCA1.pem', 'w') as f:
+        with open(FILES.ROOT_CA, 'w') as f:
             f.write(caPath)
         
-        with open(f'{self.DATA_PATH}/mqtt/topics.txt', 'w') as f:
+        with open(FILES.TOPICS, 'w') as f:
             f.write(clientname)
-        os.makedirs(f'{self.DATA_PATH}/data/logs')
         
-        if not os.path.exists(f'{self.DATA_PATH}/data/{clientname}'):
-            os.makedirs(f'{self.DATA_PATH}/data/{clientname}')  
-        if not os.path.exists(f'{self.DATA_PATH}/data/{clientname}/temperature_data'):
-            os.makedirs(f'{self.DATA_PATH}/data/{clientname}/temperature_data')
-        if not os.path.exists(f'{self.DATA_PATH}/data/{clientname}/humidity_data'):
-            os.makedirs(f'{self.DATA_PATH}/data/{clientname}/humidity_data')
+        os.makedirs(DIRECTORIES.LOGS_PATH, exist_ok=True)
+        
+        DATA_PATH = DIRECTORIES.DATA_PATH
+        if not os.path.exists(f'{DATA_PATH}/data/{clientname}'):
+            os.makedirs(f'{DATA_PATH}/data/{clientname}')  
+        if not os.path.exists(f'{DATA_PATH}/data/{clientname}/temperature_data'):
+            os.makedirs(f'{DATA_PATH}/data/{clientname}/temperature_data')
+        if not os.path.exists(f'{DATA_PATH}/data/{clientname}/humidity_data'):
+            os.makedirs(f'{DATA_PATH}/data/{clientname}/humidity_data')
     
     def setupDragDrop(self):
         self.clientname.drop_target_register(DND_FILES)
