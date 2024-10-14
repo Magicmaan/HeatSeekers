@@ -8,10 +8,12 @@ import time as t
 import json
 import random
 import threading
+from logging import DEBUG
 from logging import getLogger
 
 
 logger = getLogger("AwtBroker")
+logger.setLevel(DEBUG)
 #https://repost.aws/knowledge-center/iot-core-publish-mqtt-messages-python
 @dataclass
 class awtConnection:
@@ -51,10 +53,7 @@ class awtBroker:
         self.connectArgs = None
         if connectArgs:
             self.connectArgs = connectArgs
-        else:
-            print("No connection args provided")
         
-
         self.MESSAGE = "Hello World"
         self.TOPIC = "test/testing"
         
@@ -62,16 +61,13 @@ class awtBroker:
         self.messageCount = 0
         #setup threading event for when message is received
         self.receivedMessageEvent = threading.Event()
-        
+        self._message_callback = None
         self.connection = None
         self.connectionState = connectionState.DISCONNECTED
         
-        if self.connectArgs:
-            if autoStart:
+        if self.connectArgs and autoStart:
                 self.connect()
-                
-                
-                self.subscribe(self.TOPIC)
+
     
     def connect(self) -> None:
         """Connect to AWS broker\n
@@ -142,6 +138,7 @@ class awtBroker:
                                             payload=     json.dumps(data), 
                                             qos=         mqtt.QoS.AT_LEAST_ONCE,)
             logger.info(f"Publishing message to {topic}")
+            logger.debug(f"Message contents: {data}")
             result[0].add_done_callback(self._on_publish_success)
     
     def subscribe(self, topic: str):
@@ -149,13 +146,16 @@ class awtBroker:
         self.connection.subscribe(topic=topic, 
                                   qos=mqtt.QoS.AT_LEAST_ONCE, 
                                   callback=self._on_message_received)
+        logger.info(f"Subscribed to {topic}")
         pass
+    
+    def setMessageCallback(self, callback):
+        self._message_callback = callback
     
     def await_message(self,messageAmount:int=1):
         assert self.isConnected(), "Not connected"
         messageAmount += self.messageCount
         while self.messageCount != messageAmount or not self.receivedMessageEvent.is_set():
-            print("Waiting for message")
             self.receivedMessageEvent.wait(1)
             self.receivedMessageEvent.clear()
     #callbacks
@@ -165,11 +165,13 @@ class awtBroker:
     def _on_connect_resumed(self, connection, return_code, session_present): logger.info("*** Connection Resumed ***\n")
     def _on_connect_failure(self, connection:mqtt.Connection, callback_data): 
         logger.error("*** Connection Failed ***\n")
-        print(connection.host_name)
+        logger.error(connection.host_name)
+        
     def _on_publish_success(self, future):
         try:
             future.result()
-            logger.info("Publish successful")
+            logger.debug("Publish successful")
+            
         except Exception as e:
             pass
     
@@ -178,14 +180,12 @@ class awtBroker:
     
     def _on_message_received(self, topic, payload, dup, qos, retain, **kwargs): 
         self.messageCount += 1
-        print(f"Message received: {payload.decode()}")
-        print(f"Topic: {topic}")
+        logger.info(f"Received message from {topic}")
+        logger.debug(f"Message contents: {payload.decode()}")
+        if self._message_callback:
+            self._message_callback(topic, payload)
+        
         self.receivedMessageEvent.set()
+        
     
-if __name__ == "__main__":
-    broker = awtBroker()
-    broker.publish("Hello World", "test/testing")
-    
-    broker.await_message(10)
-    print("done")
     

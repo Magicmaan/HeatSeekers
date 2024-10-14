@@ -1,5 +1,5 @@
 echo %cd%
-start "" node-red -u %cd%/.node-red/flows.json && (
+start "" node-red && (
   echo starting Node-Red
 ) || (
   echo Node-Red not found

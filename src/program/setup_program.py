@@ -5,10 +5,15 @@ from tkinter import Widget
 from tkinter import N, S, W, E
 from tkinter import messagebox
 from tkinterdnd2 import DND_FILES, TkinterDnD
+from System import Environment
 from mqtt import pingIP
 from dataclasses import astuple
 from . import DIRECTORIES, FILES
 import os
+from logging import getLogger
+
+
+logger = getLogger("SETUP")
 
 class SETUP_STATE:
     SETUP = 0
@@ -30,22 +35,28 @@ class SetupProgram(ttk.Frame):
         
         
         self.setupState = SETUP_STATE.VERIFY
-        
         appDataState, missingDirectories, missingFiles = self.verifyAppData()
+        
         if appDataState:
             self.setupState = SETUP_STATE.COMPLETE
         else:
             self.setupState = SETUP_STATE.SETUP
-        
+            
         if self.setupState == SETUP_STATE.COMPLETE:
+            root.destroy()
+            logger.info("App data verified")
             return
         
-        
-        self.setupGUI()
-        self.setupDragDrop()
-        root.geometry("500x300")
-        self.pack()
-        self.mainloop()
+        if self.setupState == SETUP_STATE.SETUP:
+            logger.info("App data not verified")
+            logger.debug(f"Missing directories: {missingDirectories}")
+            logger.debug(f"Missing files: {missingFiles}")
+            
+            self.setupGUI()
+            self.setupDragDrop()
+            root.geometry("500x300")
+            self.pack()
+            self.mainloop()
     
     def verifyAppData(self) -> tuple[bool, list[str], list[str]]:
         """Verify that all directories and files exist\n
@@ -54,19 +65,17 @@ class SetupProgram(ttk.Frame):
         missingDirectories = []
         missingFiles = []
         
-        verifiedDirectory, missingDirectories = self.verifyDirectory()
+        verifiedDirectory, missingDirectories = self.verifyDirectories()
         if not verifiedDirectory:
-            print(f"Missing directories: {missingDirectories}")
             isVerified = False
         
         verifiedFiles, missingFiles = self.verifyFiles()
         if not verifiedFiles:
-            print(f"Missing files: {missingFiles}")
             isVerified = False
         
         return isVerified, missingDirectories, missingFiles
 
-    def verifyDirectory(self) -> tuple[bool, list[str]]:
+    def verifyDirectories(self) -> tuple[bool, list[str]]:
         """Verify that all directories exist\n
         Returns a tuple of (isVerified, missingDirectories)"""
         missingDirectories = []
@@ -94,7 +103,7 @@ class SetupProgram(ttk.Frame):
         self.hostname = ttk.Entry(self, width=75); self.hostname.pack()
         test = ttk.Label(self.hostname, text="Drag and drop files here")
         
-        ttk.Label(self, text="Device Name:").pack()
+        ttk.Label(self, text="Device Name: (leave empty to use device name)").pack()
         self.clientname = ttk.Entry(self, width=75); self.clientname.pack()
         
         ttk.Label(self, text="Certificate:").pack()
@@ -109,35 +118,25 @@ class SetupProgram(ttk.Frame):
         ttk.Button(self, text="Confirm",command=self.on_confirm).pack()
     
     def setupDirectory(self):
+        """Create directories if they do not exist"""
         for d in self.directories:
             if not os.path.exists(d):
+                logger.debug(f"Creating directory: {d}")
                 os.makedirs(d,exist_ok=True)
     
     def saveData(self, hostname:str, clientname:str, certPath:str, keyPath:str, caPath:str):
+        """write hostname, clientname, certPath, keyPath, caPath to files"""
         with open(FILES.HOST, 'w') as f:
             f.write(hostname)
-        
         with open(FILES.CERTIFICATE, 'w') as f:
             f.write(certPath)
-        
         with open(FILES.PRIVATE_KEY, 'w') as f:
             f.write(keyPath)
-        
         with open(FILES.ROOT_CA, 'w') as f:
             f.write(caPath)
-        
         with open(FILES.TOPICS, 'w') as f:
             f.write(clientname)
-        
-        os.makedirs(DIRECTORIES.LOGS_PATH, exist_ok=True)
-        
-        DATA_PATH = DIRECTORIES.DATA_PATH
-        if not os.path.exists(f'{DATA_PATH}/data/{clientname}'):
-            os.makedirs(f'{DATA_PATH}/data/{clientname}')  
-        if not os.path.exists(f'{DATA_PATH}/data/{clientname}/temperature_data'):
-            os.makedirs(f'{DATA_PATH}/data/{clientname}/temperature_data')
-        if not os.path.exists(f'{DATA_PATH}/data/{clientname}/humidity_data'):
-            os.makedirs(f'{DATA_PATH}/data/{clientname}/humidity_data')
+
     
     def setupDragDrop(self):
         self.clientname.drop_target_register(DND_FILES)
@@ -160,7 +159,6 @@ class SetupProgram(ttk.Frame):
     def drop_hostname(self, event):
         f = self.getDropFileContents(event)
         if f:
-            print(f)
             self.hostname.delete(0, END)
             self.hostname.insert(0, f)
         self.validate_hostname()
@@ -195,8 +193,8 @@ class SetupProgram(ttk.Frame):
     
     def validate_clientname(self) -> bool:
         if not self.clientname.get():
-            messagebox.showerror("Error", "Please enter a client name")
-            return False
+            self.clientname.insert(0, Environment.DEVICE_NAME)
+
         if any((c in self.clientname_blacklist_chars) for c in self.clientname.get()):
             messagebox.showerror("Error", f"Client name cannot contain any of the following characters:{self.clientname_blacklist_chars}")
             return False
@@ -207,6 +205,7 @@ class SetupProgram(ttk.Frame):
             return False
         #check if hostname is valid
         if not pingIP(self.hostname.get()):
+            logger.error(f"Unable to ping: {self.hostname.get()}")
             messagebox.showerror("Error", "Unable to ping: {self.hostname.get()}\n Please be sure the hostname is correct, and are connected.")
             return False
         return True

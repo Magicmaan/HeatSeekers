@@ -1,10 +1,16 @@
 from threading import Thread
 import time
+
+from pi_interface import DHTSensor
 from . import DIRECTORIES,DATA_PATH, FILES
 from . import SetupProgram
-from Logger import CustomLogger, LoggerUI
+from . import LoggerWindow
+from . import START_TIME
 import os
 from mqtt import awtBroker, awtConnection, pingIP
+from multiprocessing import Process
+from logging import getLogger
+
 
 
             
@@ -19,18 +25,16 @@ class Program:
         return cls.__ins
     
     def __init__(self):
+        logger = getLogger("Program")
+        self.startTime = START_TIME
+        self.loggerWindow = LoggerWindow()
+        logger.info(f"Program started")
+        
+        self.programThread = Thread(target=self.run)
+        
+        
         SetupProgram()
-        self.startTime:float = time.time()
         
-        customLogger = CustomLogger()
-        
-        self.logger = LoggerUI(None, customLogger)
-        
-        print("Logger created")
-        
-        
-        
-
         #get app data
         #includes connection data, etc
         self.getAppData()
@@ -42,27 +46,23 @@ class Program:
             self.privateKey,
             self.rootCA
         )
+        self.awtBroker = awtBroker(self.awtConnection, autoStart=False)
         
-        self.awtBroker = awtBroker(self.awtConnection, autoStart=True)
+        self.sensor = DHTSensor(useDummy=True)
+        self.sensorThread = Thread(target=self.sensor.run)
+
+        #start program thread
+        self.sensorThread.start()
+        self.programThread.start()
+        self.loggerWindow.mainloop()
+        
+    #program thread
+    def run(self):
+        self.awtBroker.connect()
+        self.awtBroker.subscribe("test/testing")
+        
         self.awtBroker.publish("Hello World", "test/testing")
-
         
-        self.loggerThread = Thread(target=self.logger.start)
-        self.mainThread = Thread(target=self.start)
-        
-        
-        
-        self.mainThread.start()
-        self.logger.start()
-        
-        
-        
-    def start(self):
-        """Start the program"""
-        print("Program started")
-        self.awtBroker.await_message(-1)
-        pass
-
     
     def getRuntime(self) -> float:
         """Get the runtime of the program"""
@@ -77,7 +77,6 @@ class Program:
         self.cert = files.CERTIFICATE
         self.privateKey = files.PRIVATE_KEY
         self.rootCA = files.ROOT_CA
-        
         
 
 
