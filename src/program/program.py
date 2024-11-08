@@ -7,6 +7,7 @@ from . import DIRECTORIES,DATA_PATH, FILES
 from . import SetupProgram
 from . import LoggerWindow
 from . import SensorLoggerWindow
+from . import MQTTLoggerWindow
 from . import START_TIME
 import os
 from mqtt import awtBroker, awtConnection, pingIP
@@ -27,8 +28,9 @@ class Program:
     def __init__(self):
         self.startTime = START_TIME
         
-        self.loggerWindow = LoggerWindow(blacklist="SENSOR_DATA")
+        self.loggerWindow = LoggerWindow(blacklist=["SENSOR_DATA", "MQTT_CONNECTION"])
         self.tempReadingWindow = SensorLoggerWindow()
+        self.mqttWindow = MQTTLoggerWindow()
         
         logger.info(f"Program started")
         #setup program / data
@@ -45,7 +47,7 @@ class Program:
             self.rootCA
         )
         self.awtBroker = awtBroker(self.awtConnection, autoStart=False)
-        self.sensor = DHTSensor(useDummy=True)
+        self.sensor = DHTSensor()
         
         self.sensorThread = Thread(target=self.sensor.run)
         self.programThread = Thread(target=self.run)

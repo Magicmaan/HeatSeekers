@@ -13,6 +13,7 @@ from program.Logger import getLogger
 
 
 logger = getLogger("AWT_BROKER")
+connection_logger = getLogger("MQTT_CONNECTION")
 #https://repost.aws/knowledge-center/iot-core-publish-mqtt-messages-python
 @dataclass
 class awtConnection:
@@ -144,8 +145,8 @@ class awtBroker:
             result = self.connection.publish(topic=      topic, 
                                             payload=     json.dumps(data), 
                                             qos=         mqtt.QoS.AT_LEAST_ONCE,)
-            logger.info(f"Publishing message to {topic}")
-            logger.debug(f"Message contents: {data}")
+            connection_logger.info(f"Publishing message to {topic}")
+            connection_logger.debug(f"Message contents: {data}")
             result[0].add_done_callback(self._on_publish_success)
     
     def subscribe(self, topic: str):
@@ -154,6 +155,7 @@ class awtBroker:
                                   qos=mqtt.QoS.AT_LEAST_ONCE, 
                                   callback=self._on_message_received)
         logger.info(f"Subscribed to {topic}")
+        connection_logger.info(f"Subscribed to {topic}")
         pass
     
     def setMessageCallback(self, callback):
@@ -166,10 +168,10 @@ class awtBroker:
             self.receivedMessageEvent.wait(1)
             self.receivedMessageEvent.clear()
     #callbacks
-    def _on_connect_success(self, connection, callback_data): logger.info("*** Connected ***\n"); self.connectionState = connectionState.CONNECTED
-    def _on_connect_close(self, connection, callback_data): logger.info("*** Connection Closed ***\n"); self.connectionState = connectionState.DISCONNECTED
-    def _on_connect_interrupted(self, connection, error): logger.error("*** Connection interrupted ***\n"); print(f"Error: {error}\n")
-    def _on_connect_resumed(self, connection, return_code, session_present): logger.info("*** Connection Resumed ***\n")
+    def _on_connect_success(self, connection, callback_data): connection_logger.info("*** Connected ***\n"); logger.info("*** Connected ***\n"); self.connectionState = connectionState.CONNECTED
+    def _on_connect_close(self, connection, callback_data): connection_logger.info("*** Connection Closed ***\n"); self.connectionState = connectionState.DISCONNECTED
+    def _on_connect_interrupted(self, connection, error): connection_logger.error("*** Connection interrupted ***\n"); print(f"Error: {error}\n")
+    def _on_connect_resumed(self, connection, return_code, session_present): connection_logger.info("*** Connection Resumed ***\n")
     def _on_connect_failure(self, connection:mqtt.Connection, callback_data): 
         logger.error("*** Connection Failed ***\n")
         logger.error(connection.host_name)
@@ -177,18 +179,20 @@ class awtBroker:
     def _on_publish_success(self, future):
         try:
             future.result()
-            logger.debug("Publish successful")
+            connection_logger.debug("Publish successful")
             
         except Exception as e:
             pass
     
     def _on_publish_failure(self, connection, callback_data): 
+        
         logger.error(f"Publish failed: {connection.host_name}")
+        connection_logger.error(f"Publish failed: {connection.host_name}")
     
     def _on_message_received(self, topic, payload, dup, qos, retain, **kwargs): 
         self.messageCount += 1
-        logger.info(f"Received message from {topic}")
-        logger.debug(f"Message contents: {payload.decode()}")
+        connection_logger.info(f"Received message from {topic}")
+        connection_logger.debug(f"Message contents: {payload.decode()}")
         if self._message_callback:
             self._message_callback(topic, payload)
         

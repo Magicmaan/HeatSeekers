@@ -14,7 +14,7 @@ from System import Environment, DIRECTORIES, FILES, INSTANCE_FILES
 DATA_PATH = DIRECTORIES.DATA_PATH
 CONNECTION_DATA_PATH = DIRECTORIES.CONNECTION_DATA_PATH
 
-from .GUI.LoggerWindow import LoggerWindow, SensorLoggerWindow
+from .GUI.LoggerWindow import LoggerWindow, SensorLoggerWindow, MQTTLoggerWindow
 from .setup_program import SetupProgram
 from .program import Program
 
@@ -29,4 +29,5 @@ __all__ = [
     
     'LoggerWindow',
     'SensorLoggerWindow',
+    'MQTTLoggerWindow',
 ]

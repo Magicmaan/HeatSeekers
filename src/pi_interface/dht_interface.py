@@ -69,15 +69,19 @@ class DHTSensor:
     """
     #TODO
     def __init__(self, useDummy:bool=False):
+        logger.info("-"*10 + "\nInitializing DHT Sensor")
         if not useDummy:
-            if not Environment.isRaspberryPi():
-                logger.error("Not running on Raspberry Pi, cannot use DHT sensor")
-                return
-            if not Environment.hasdht():
-                logger.error("Raspberry Pi does not have a DHT sensor")
-                return
+            logger.debug("Attempting to initialize sensor")
+            hasSensor = True
+            if not Environment.isRaspberryPi(): logger.error("Not running on a Raspberry Pi"); hasSensor = False
+            if not Environment.hasdht(): logger.error("Raspberry Pi does not have a DHT sensor"); hasSensor = False
             
-            self.sensor = adafruit_dht.DHT22(board.D4)
+            if hasSensor:
+                self.sensor = adafruit_dht.DHT22(board.D4)
+                logger.info("Sensor initialized")
+            else:
+                logger.error("Failed to initialize sensor. Using fallback Dummy Sensor") 
+                self.sensor = DummySensor()
         else:
             self.sensor = DummySensor()
             logger.info("Using dummy sensor")
@@ -86,19 +90,15 @@ class DHTSensor:
         self.queryInterval:int = 1
         self.lastQueryTime:float = time()
         
-        #data cache to store the last n data points
-        #DataCache = {
-        # [time:int, temperature:float, humidity:float],   
-        # [time:int, temperature:float, humidity:float],
-        # [time:int, temperature:float, humidity:float],
-        # ...
-        # }
+
         self.dataCacheSize:int = 50
         self.dataCache = deque(maxlen=self.dataCacheSize)
         
         self.temperature:float = 0
         self.humidity:float = 0
-        
+    
+
+    
     def getData(self) -> tuple[float, float]:
         """Get the last temperature and humidity readings"""
         return list(self.dataCache)

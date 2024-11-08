@@ -51,35 +51,39 @@ class LoggerWindow(ttk.Frame):
             root = Tk()
         super().__init__(root)
         self.root = root
+        #set title
         self.title = loggerName if loggerName else "Debug Logger"
         self.root.title(self.title)
+        
+        # get the logger if name is provided, else use root logger
         self.logger = getLogger(loggerName) if loggerName else _logger
         
+        #add Handler to redirect logger to window
+        self.logQueue = queue.Queue()
+        self.queueHandler = QueueHandler(self.logQueue)
+        
+        self.logger.addHandler(self.queueHandler)
+        
+        #set a formatter for logs
+        formatString = format if format else '%(asctime)s %(name)s - %(levelname)s - %(message)s'
+        self.formatter = logging.Formatter(datefmt='%H:%M:%S', fmt=formatString)
+        self.queueHandler.setFormatter(self.formatter)
+        
+        #setup log level feedback for radiobuttons
         self.logLevel:StringVar = StringVar()
         self.logLevel.set("DEBUG")
         self._setLogLevel()
         
+        # blacklist of loggers to exclude from window
+        self.loggerBlacklist = blacklist if blacklist else [""]
+        self._logToTerminal = False
+        
+        
+        # create the main frame and setup the GUI
         self.frame = ttk.Frame(self.root, padding=10, name='loggerFrame')
         self.frame.grid(column=0, row=0, sticky=(N, S, W, E))
-        
-        self.loggerBlacklist = blacklist if blacklist else [""]
-        #bool whether to log to terminal
-        self._logToTerminal = False
         self.setupGUI()
-        #add Handler to redirect logger to a Queue
-        #This can be read by tkinter
-        self.logQueue = queue.Queue()
-        self.queueHandler = QueueHandler(self.logQueue)
-        self.logger.addHandler(self.queueHandler)
-
-        formatString = format if format else '%(asctime)s %(name)s - %(levelname)s - %(message)s'
-        #set a formatter
-        self.formatter = logging.Formatter(datefmt='%H:%M:%S', fmt=formatString)
-        
-        self.queueHandler.setFormatter(self.formatter)
-        
-
-        
+       
         # Start polling messages from the queue
         self.frame.after(100, self.poll_log_queue)
     
@@ -102,7 +106,8 @@ class LoggerWindow(ttk.Frame):
         ttk.Button(bar, text="Quit", command=self.root.destroy).grid(column=1, row=0)
         ttk.Button(bar, text="Log", command=self.log).grid(column=2, row=0)
         ttk.Checkbutton(bar, text="Log to terminal", command=self.toggleLogToTerminal).grid(column=3, row=0)
-        ttk.Checkbutton(bar, text="Log to file", command=self.toggleLogToFile).grid(column=4, row=0)
+        
+        #radiobuttons for log level
         ttk.Radiobutton(bar, text="Debug", variable=self.logLevel, value="DEBUG", command=self._setLogLevel).grid(column=5, row=0)
         ttk.Radiobutton(bar, text="Info", variable=self.logLevel, value="INFO", command=self._setLogLevel).grid(column=6, row=0)
         ttk.Radiobutton(bar, text="Warning", variable=self.logLevel, value="WARNING", command=self._setLogLevel).grid(column=7, row=0)
@@ -124,24 +129,30 @@ class LoggerWindow(ttk.Frame):
         self.scrollPane.tag_config('ERROR', foreground='red')
         self.scrollPane.tag_config('CRITICAL', foreground='red', underline=1)
     
-    #toggle functions for buttons
+
     def toggleLogToTerminal(self):
         self._logToTerminal = not self._logToTerminal
-    def toggleLogToFile(self):
-        self._logToFile = not self._logToFile
+        
     def _setLogLevel(self):
+        """Internal function to set the log level of the logger.
+            Used for radiobuttons"""
         self.logger.setLevel(self.logLevel.get())
+        self.queueHandler.setLevel(self.logLevel.get())
     
         
     def display(self, record: LogRecord):
+        """Display a log record in the scrolled text widget"""
+        # if name in blacklist, discard
         if record.name in self.loggerBlacklist:
             return
-        
-        #take in string and display to window
+
+        # format the record
         msg = self.formatter.format(record)
+        
         if self._logToTerminal:
             print(msg)
         
+        # Display the record in the scrolled text widget
         self.scrollPane.configure(state='normal')
         self.scrollPane.insert(END, msg + '\n', record.levelname)
         self.scrollPane.configure(state='disabled')
@@ -172,9 +183,9 @@ class LoggerWindow(ttk.Frame):
     def isTopLevel(self):
         return isinstance(self.root, Toplevel)
 
-class DebugLoggerWindow(LoggerWindow):
+class MQTTLoggerWindow(LoggerWindow):
     def __init__(self):
-        super().__init__()
+        super().__init__(None, "MQTT_CONNECTION")
 
 class SensorLoggerWindow(LoggerWindow):
     def __init__(self):
