@@ -2,18 +2,18 @@ from threading import Thread
 import time
 
 from pi_interface import DHTSensor
+from .Logger import getSensorLogger
 from . import DIRECTORIES,DATA_PATH, FILES
 from . import SetupProgram
 from . import LoggerWindow
+from . import SensorLoggerWindow
 from . import START_TIME
 import os
 from mqtt import awtBroker, awtConnection, pingIP
 from multiprocessing import Process
-from logging import getLogger
+from program.Logger import getLogger
 
-
-
-            
+logger = getLogger("PROGRAM")
 
 class Program:
     #singleton instance
@@ -25,16 +25,14 @@ class Program:
         return cls.__ins
     
     def __init__(self):
-        logger = getLogger("Program")
         self.startTime = START_TIME
-        self.loggerWindow = LoggerWindow()
+        
+        self.loggerWindow = LoggerWindow(blacklist="SENSOR_DATA")
+        self.tempReadingWindow = SensorLoggerWindow()
+        
         logger.info(f"Program started")
-        
-        self.programThread = Thread(target=self.run)
-        
-        
+        #setup program / data
         SetupProgram()
-        
         #get app data
         #includes connection data, etc
         self.getAppData()
@@ -47,21 +45,35 @@ class Program:
             self.rootCA
         )
         self.awtBroker = awtBroker(self.awtConnection, autoStart=False)
-        
         self.sensor = DHTSensor(useDummy=True)
+        
         self.sensorThread = Thread(target=self.sensor.run)
+        self.programThread = Thread(target=self.run)
 
         #start program thread
         self.sensorThread.start()
         self.programThread.start()
         self.loggerWindow.mainloop()
-        
+    
+
     #program thread
     def run(self):
         self.awtBroker.connect()
         self.awtBroker.subscribe("test/testing")
+        self.awtBroker.subscribe("test/sensor_data")
         
         self.awtBroker.publish("Hello World", "test/testing")
+        
+        while True:
+            temperature = self.sensor.temperature
+            humidity = self.sensor.humidity
+            
+            print(f"Temperature: {temperature}")
+            
+            self.awtBroker.publish(f"Temperature: {temperature}", "test/sensor_data")
+            
+            time.sleep(1)
+            
         
     
     def getRuntime(self) -> float:

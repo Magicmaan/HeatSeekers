@@ -10,7 +10,7 @@ from mqtt import pingIP
 from dataclasses import astuple
 from . import DIRECTORIES, FILES
 import os
-from logging import getLogger
+from program.Logger import getLogger
 
 
 logger = getLogger("SETUP")

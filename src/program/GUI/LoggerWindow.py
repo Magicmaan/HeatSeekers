@@ -1,16 +1,16 @@
 from os import path
+import string
 from tkinter import ttk, Tk, END, scrolledtext, Widget, N, S, W, E, Toplevel, StringVar
 from program import DIRECTORIES, START_TIME, INSTANCE_FILES
 import queue
 import logging
-from logging import Handler
+from logging import Handler, LogRecord
 import tkinter as tk
 
+from program.Logger import getLogger, logFormatter
 
 
-logger = logging.getLogger()
-logger.setLevel(logging.DEBUG)
-logger.setLevel(logging.INFO | logging.DEBUG | logging.WARNING | logging.ERROR | logging.CRITICAL) 
+_logger = getLogger()
 
 
 
@@ -23,8 +23,10 @@ class QueueHandler(Handler):
         super().__init__()
         self.log_queue = log_queue
 
-    def emit(self, record):
+    def emit(self, record: LogRecord):
         self.log_queue.put(record)
+
+
 
 class LoggerWindow(ttk.Frame):
     """
@@ -44,46 +46,38 @@ class LoggerWindow(ttk.Frame):
         isTopLevel():
             Checks if the root widget is a Toplevel widget.
     """
-    def __init__(self, root: Widget=None, logger:logging.Logger=None):
+    def __init__(self, root: Widget=None, loggerName:str = None, blacklist:list=None, format:str = None):
         if not root:
             root = Tk()
         super().__init__(root)
-        if not logger:
-            logger = logging.getLogger()
+        self.root = root
+        self.title = loggerName if loggerName else "Debug Logger"
+        self.root.title(self.title)
+        self.logger = getLogger(loggerName) if loggerName else _logger
         
         self.logLevel:StringVar = StringVar()
-        self.logLevel.set("INFO")
+        self.logLevel.set("DEBUG")
         self._setLogLevel()
         
-        self.root = root
-        self.frame = ttk.Frame(self.root, padding=10)
+        self.frame = ttk.Frame(self.root, padding=10, name='loggerFrame')
         self.frame.grid(column=0, row=0, sticky=(N, S, W, E))
         
+        self.loggerBlacklist = blacklist if blacklist else [""]
         #bool whether to log to terminal
-        self._logToTerminal = True
-        #bool whether to log to file
-        self._logToFile = True
-        
-        
+        self._logToTerminal = False
         self.setupGUI()
-        
-        
         #add Handler to redirect logger to a Queue
         #This can be read by tkinter
         self.logQueue = queue.Queue()
         self.queueHandler = QueueHandler(self.logQueue)
-        logger.addHandler(self.queueHandler)
+        self.logger.addHandler(self.queueHandler)
+
+        formatString = format if format else '%(asctime)s %(name)s - %(levelname)s - %(message)s'
+        #set a formatter
+        self.formatter = logging.Formatter(datefmt='%H:%M:%S', fmt=formatString)
         
+        self.queueHandler.setFormatter(self.formatter)
         
-        #add Handler to log to a file
-        fileHandler = logging.FileHandler(INSTANCE_FILES.LOG_FILE)
-        fileHandler.setLevel(logging.DEBUG)
-        logger.addHandler(fileHandler)
-        
-        #set a formatter for log messages
-        formatter = logging.Formatter(datefmt='%H:%M:%S', fmt='%(asctime)s %(name)s - %(levelname)s - %(message)s')
-        self.queueHandler.setFormatter(formatter)
-        fileHandler.setFormatter(formatter)
 
         
         # Start polling messages from the queue
@@ -136,12 +130,15 @@ class LoggerWindow(ttk.Frame):
     def toggleLogToFile(self):
         self._logToFile = not self._logToFile
     def _setLogLevel(self):
-        logger.setLevel(self.logLevel.get())
+        self.logger.setLevel(self.logLevel.get())
     
         
-    def display(self, record):
+    def display(self, record: LogRecord):
+        if record.name in self.loggerBlacklist:
+            return
+        
         #take in string and display to window
-        msg = self.queueHandler.format(record)
+        msg = self.formatter.format(record)
         if self._logToTerminal:
             print(msg)
         
@@ -150,12 +147,13 @@ class LoggerWindow(ttk.Frame):
         self.scrollPane.configure(state='disabled')
         # Autoscroll to the bottom
         self.scrollPane.yview(END)
+    
     def poll_log_queue(self):
         assert self.logQueue is not None, "logQueue is None"
         # Check every 100ms if there is a new message in the queue to display
         while True:
             try:
-                record = self.logQueue.get(block=False)
+                record: LogRecord = self.logQueue.get(block=False)
             except queue.Empty:
                 break
             else:
@@ -165,12 +163,20 @@ class LoggerWindow(ttk.Frame):
         self.frame.after(100, self.poll_log_queue)
 
     def log(self):
-        logger.debug('debug message')
-        logger.info('info message')
-        logger.warning('warning message')
-        logger.error('error message')
-        logger.critical('critical message')
+        self.logger.debug('debug message')
+        self.logger.info('info message')
+        self.logger.warning('warning message')
+        self.logger.error('error message')
+        self.logger.critical('critical message')
     
     def isTopLevel(self):
         return isinstance(self.root, Toplevel)
-    
+
+class DebugLoggerWindow(LoggerWindow):
+    def __init__(self):
+        super().__init__()
+
+class SensorLoggerWindow(LoggerWindow):
+    def __init__(self):
+        super().__init__(None, "SENSOR_DATA",format='%(message)s')
+        

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<script type="text/javascript">
+    RED.nodes.registerType('awsiotv2', {
+        category: 'AWS',
+        color: '#FF9900',
+        defaults: {
+            name: { value: "" },
+            IP: { value: "" },
+            accessKeyId: { value: "" },
+            secretAccessKey: { value: "" },
+            privateKey: { value: "" },
+            publicKey: { value: "" },
+            caCert: { value: "" },
+            clientId: { value: "" }
+        },
+        inputs: 1,
+        outputs: 1,
+        icon: "file.png",
+        label: function() {
+            return this.name || "AWS IoT V2";
+        }
+    });
+</script>
+
+<script type="text/x-red" data-template-name="awsiotv2">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+    <div class="form-row">
+        <label for="node-input-IP"><i class="fa fa-globe"></i> IP</label>
+        <input type="text" id="node-input-IP" placeholder="IP">
+    </div>
+    <div class="form-row">
+        <label for="node-input-accessKeyId"><i class="fa fa-key"></i> Access Key ID</label>
+        <input type="text" id="node-input-accessKeyId" placeholder="Access Key ID">
+    </div>
+    <div class="form-row">
+        <label for="node-input-secretAccessKey"><i class="fa fa-lock"></i> Secret Access Key</label>
+        <input type="password" id="node-input-secretAccessKey" placeholder="Secret Access Key">
+    </div>
+    <div class="form-row">
+        <label for="node-input-privateKey"><i class="fa fa-key"></i> Private Key</label>
+        <input type="text" id="node-input-privateKey" placeholder="Private Key">
+    </div>
+    <div class="form-row">
+        <label for="node-input-publicKey"><i class="fa fa-key"></i> Public Key</label>
+        <input type="text" id="node-input-publicKey" placeholder="Public Key">
+    </div>
+    <div class="form-row">
+        <label for="node-input-caCert"><i class="fa fa-certificate"></i> CA Certificate</label>
+        <input type="text" id="node-input-caCert" placeholder="CA Certificate">
+    </div>
+    <div class="form-row">
+        <label for="node-input-clientId"><i class="fa fa-id-badge"></i> Client ID</label>
+        <input type="text" id="node-input-clientId" placeholder="Client ID">
+    </div>
+</script>
+
+<script type="text/x-red" data-help-name="awsiotv2">
+    <p>This node allows you to connect to AWS IoT using the V2 SDK.</p>
+</script>
+
+<!-- // Register the node
+    RED.nodes.registerType('awsiotv2', AwsIotV2Node, {
+        inputs: 1,
+        outputs: 1,
+        category: 'AWS IoT',
+        //set categories and input values
+        defaults: {
+            name: { value: '' },
+            ip: { value: '' },
+            privateKey: { value: '', type: 'text' },
+            publicKey: { value: '', type: 'text' },
+            caCert: { value: '', type: 'text' },
+            clientId: { value: 'node-red-client', type: 'text' }
+        },
+        credentials: {
+            privateKey: { type: 'password' },
+            publicKey: { type: 'password' },
+            caCert: { type: 'password' }
+        }
+    }); -->

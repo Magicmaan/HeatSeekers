@@ -9,11 +9,10 @@ import json
 import random
 import threading
 from logging import DEBUG
-from logging import getLogger
+from program.Logger import getLogger
 
 
-logger = getLogger("AwtBroker")
-logger.setLevel(DEBUG)
+logger = getLogger("AWT_BROKER")
 #https://repost.aws/knowledge-center/iot-core-publish-mqtt-messages-python
 @dataclass
 class awtConnection:
@@ -125,13 +124,21 @@ class awtBroker:
         assert not self.isConnected(), "Cannot change connection settings while connected"
         self.connectArgs = connectArgs
     
-    def publish(self, message: str, topic: str,messageRepeat: int=1):
+    def publish(self, message: str, topic: str, type:str="SENSOR_DATA",messageRepeat: int=1):
         """Publish message to desired topic"""
         assert self.isConnected(), "Not connected"
         assert messageRepeat > 0
         assert topic != ""
-
-        data = newTestPacket()
+        data = None
+        
+        if type == "SENSOR_DATA":
+            data = newSensorPacket(random.uniform(0,100), random.uniform(0,100))
+        elif type == "MESSAGE":
+            data = newPacket(message)
+        else:
+            data = newTestPacket()
+        
+        
         for i in range (messageRepeat):
             #assemmble message into a json
             result = self.connection.publish(topic=      topic, 

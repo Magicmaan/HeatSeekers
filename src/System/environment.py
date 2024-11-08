@@ -199,4 +199,4 @@ class FILES:
 class INSTANCE_FILES:
     LOG_FILE: str = path.join(DIRECTORIES.LOGS_PATH, f"{START_TIME}_log.log")
     
-    SENSOR_DATA_FILE: str = path.join(DIRECTORIES.SENSOR_DATA_PATH, f"{START_TIME}_sensor_data.txt")
+    SENSOR_DATA_FILE: str = path.join(DIRECTORIES.SENSOR_DATA_PATH, f"{START_TIME}_sensor_data.json")

@@ -1,22 +1,20 @@
 import logging
 import time
 import board
-from logging import FileHandler, getLogger
 from time import sleep, time
 from System import Environment
 from random import random
 from math import floor, sin, cos, sqrt, atan2, radians
 from collections import deque
 
+from datetime import datetime
 from System import INSTANCE_FILES
 from Util.data import predictFutureValue, getAverageData
+from program.Logger import getSensorLogger, getLogger
 
-logger = logging.getLogger("DHTSensor")
-logger.setLevel(logging.DEBUG)
 
-sensorDataLogger = getLogger("SENSOR_DATA")
-# Remove any existing handlers
-sensorDataLogger.setLevel(logging.DEBUG)
+logger = getLogger("DHTSensor")
+sensorDataLogger = getSensorLogger()
 
 try:
     import adafruit_dht
@@ -83,14 +81,6 @@ class DHTSensor:
         else:
             self.sensor = DummySensor()
             logger.info("Using dummy sensor")
-        
-        formatter = logging.Formatter(datefmt='%H:%M:%S', fmt='%(asctime)s: %(message)s')
-        sensorDataFile = FileHandler(INSTANCE_FILES.SENSOR_DATA_FILE)
-        sensorDataFile.setFormatter(formatter)
-        sensorDataLogger.addHandler(sensorDataFile)
-        
-        sensorDataLogger.info("Sensor data logger started")
-
 
         #how often to query the sensor in seconds
         self.queryInterval:int = 1
@@ -106,8 +96,8 @@ class DHTSensor:
         self.dataCacheSize:int = 50
         self.dataCache = deque(maxlen=self.dataCacheSize)
         
-        self.lastTemperature:float = 0
-        self.lastHumidity:float = 0
+        self.temperature:float = 0
+        self.humidity:float = 0
         
     def getData(self) -> tuple[float, float]:
         """Get the last temperature and humidity readings"""
@@ -144,21 +134,26 @@ class DHTSensor:
             #query the sensor for data
             temperatureData, humidityData = self.querySensor()
             #if data is returned
-            if temperatureData and humidityData:
+            if temperatureData and humidityData: 
                 self.lastQueryTime = time()
-                self.lastTemperature = temperatureData
-                self.lastHumidity = humidityData
+                self.temperature = temperatureData
+                self.humidity = humidityData
                 
                 #append the data to the data cache
                 #also adds to lastTemp and lastHumidity
-                self.dataCache.append([self.lastQueryTime, self.lastTemperature, self.lastHumidity])
+                self.dataCache.append([self.lastQueryTime, self.temperature, self.humidity])
                 #log the data to the sensor data file
-                msg = f"Temperature: {round(self.lastTemperature,2)} Humidity: {round(self.lastHumidity,2)}"
-                sensorDataLogger.log(logging.DEBUG, msg)
-                
-                predictedTemperature = predictFutureValue(self.dataCache, 10)
-                msg = f"Predicted temperature in 10 seconds: {round(predictedTemperature, 2)}"
-                sensorDataLogger.log(logging.DEBUG, msg)
+                msg = {
+                    "timestamp": datetime.now().time().__str__(),  
+                    "temperature": round(self.temperature, 2), 
+                    "humidity": round(self.humidity, 2),
+                    "predicted_temperature": round(predictFutureValue(self.dataCache, 10), 2),
+                    "units": {
+                        "temperature": "C",
+                        "humidity": "%"
+                    }
+                }
+                sensorDataLogger.log(logging.DEBUG,msg)
             else:
                 sleep(1)
 
