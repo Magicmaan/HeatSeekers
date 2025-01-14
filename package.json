@@ -1,5 +1,7 @@
 {
   "dependencies": {
-    "aws-iot-device-sdk-v2": "^1.21.1"
+    "aws-iot-device-sdk": "^2.2.15",
+    "aws-iot-device-sdk-v2": "^1.21.1",
+    "node-red-contrib-aws-iot-hub": "^0.1.14"
   }
 }

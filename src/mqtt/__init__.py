@@ -1,5 +1,6 @@
 #import modules from the mqtt package as relative imports
 from .awtBroker import awtBroker, awtConnection
+from .mqttBroker import mqttBroker
 import subprocess
 import os
 
@@ -36,5 +37,5 @@ def pingIP(ip_address: str) -> bool:
         return False
 
 
-__all__ = ['awtBroker', 'awtConnection'
+__all__ = ['awtBroker', 'awtConnection', 'pingIP', 'mqttBroker'
            ]

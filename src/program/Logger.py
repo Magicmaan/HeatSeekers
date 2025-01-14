@@ -2,15 +2,16 @@ from logging import FileHandler, Handler, getLogger, Formatter, Logger
 import logging
 import string
 from pythonjsonlogger import jsonlogger
-
 from System.environment import INSTANCE_FILES
-
-logFormatter: Formatter = Formatter(datefmt='%H:%M:%S', fmt='%(asctime)s %(name)s - %(levelname)s - %(message)s')
-sensorLogFormatter: jsonlogger.JsonFormatter = jsonlogger.JsonFormatter('%(timestamp)s %(temperature)s %(humidity)s %(units)s')
 
 loggerFileHandler: Handler = FileHandler(INSTANCE_FILES.LOG_FILE)
 loggerFileHandler.addFilter(lambda record: record.name != "SENSOR_DATA")
 sensorFileHandler: Handler = FileHandler(INSTANCE_FILES.SENSOR_DATA_FILE)
+
+# create log formatter
+logFormatter: Formatter = Formatter(datefmt='%H:%M:%S', fmt='%(asctime)s %(name)s - %(levelname)s - %(message)s')
+# create sensor log formatter (outputs json)
+sensorLogFormatter: jsonlogger.JsonFormatter = jsonlogger.JsonFormatter('%(timestamp)s %(temperature)s %(humidity)s %(units)s')
 
 loggerFileHandler.setFormatter(logFormatter)
 sensorFileHandler.setFormatter(sensorLogFormatter)

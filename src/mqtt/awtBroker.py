@@ -3,13 +3,14 @@ from awscrt import io, mqtt, auth, http
 from awsiot import mqtt_connection_builder
 from .Templates import *
 from dataclasses import asdict, dataclass
-import os   
+import platform
 import time as t
 import json
 import random
 import threading
 from logging import DEBUG
 from program.Logger import getLogger
+from System.environment import Environment
 
 
 logger = getLogger("AWT_BROKER")
@@ -31,7 +32,7 @@ class awtConnection:
     cert_filepath:str
     pri_key_filepath:str
     ca_filepath:str
-    client_id:str = f"python_mqtt"
+    client_id:str = Environment.getIdentifier()
 
 class connectionState:
     DISCONNECTED = 0
@@ -59,8 +60,6 @@ class awtBroker:
         
         
         self.messageCount = 0
-        #setup threading event for when message is received
-        self.receivedMessageEvent = threading.Event()
         self._message_callback = None
         self.connection = None
         self.connectionState = connectionState.DISCONNECTED
@@ -125,29 +124,26 @@ class awtBroker:
         assert not self.isConnected(), "Cannot change connection settings while connected"
         self.connectArgs = connectArgs
     
-    def publish(self, message: str, topic: str, type:str="SENSOR_DATA",messageRepeat: int=1):
+    def publish(self, message: str, topic: str, messageRepeat: int=1):
         """Publish message to desired topic"""
         assert self.isConnected(), "Not connected"
         assert messageRepeat > 0
         assert topic != ""
-        data = None
-        
-        if type == "SENSOR_DATA":
-            data = newSensorPacket(random.uniform(0,100), random.uniform(0,100))
-        elif type == "MESSAGE":
-            data = newPacket(message)
-        else:
-            data = newTestPacket()
-        
         
         for i in range (messageRepeat):
             #assemmble message into a json
             result = self.connection.publish(topic=      topic, 
-                                            payload=     json.dumps(data), 
+                                            payload=     message, 
                                             qos=         mqtt.QoS.AT_LEAST_ONCE,)
             connection_logger.info(f"Publishing message to {topic}")
-            connection_logger.debug(f"Message contents: {data}")
+            connection_logger.debug(f"Message contents: {message}")
             result[0].add_done_callback(self._on_publish_success)
+
+
+    def publishSensorData(self, temperature: float, humidity: float, units: list[str,str] = ["C","%"]):
+        """Publish sensor data"""
+        data = newSensorPacket(temperature, humidity, units=units, identifier=self.connectArgs.client_id)
+        self.publish(data, "test/sensor_data")
     
     def subscribe(self, topic: str):
         assert self.isConnected()
@@ -158,15 +154,14 @@ class awtBroker:
         connection_logger.info(f"Subscribed to {topic}")
         pass
     
-    def setMessageCallback(self, callback):
+    def setMessageCallback(self, callback: callable):
+        """Set the callback function for when a message is received\n
+        Callback must accept two arguments: topic: str and payload: dict\n
+        """
+        assert callable(callback), "Callback must be callable"
+        assert callback.__code__.co_argcount == 2, "Callback must accept exactly two arguments"
         self._message_callback = callback
     
-    def await_message(self,messageAmount:int=1):
-        assert self.isConnected(), "Not connected"
-        messageAmount += self.messageCount
-        while self.messageCount != messageAmount or not self.receivedMessageEvent.is_set():
-            self.receivedMessageEvent.wait(1)
-            self.receivedMessageEvent.clear()
     #callbacks
     def _on_connect_success(self, connection, callback_data): connection_logger.info("*** Connected ***\n"); logger.info("*** Connected ***\n"); self.connectionState = connectionState.CONNECTED
     def _on_connect_close(self, connection, callback_data): connection_logger.info("*** Connection Closed ***\n"); self.connectionState = connectionState.DISCONNECTED
@@ -175,7 +170,6 @@ class awtBroker:
     def _on_connect_failure(self, connection:mqtt.Connection, callback_data): 
         logger.error("*** Connection Failed ***\n")
         logger.error(connection.host_name)
-        
     def _on_publish_success(self, future):
         try:
             future.result()
@@ -183,20 +177,24 @@ class awtBroker:
             
         except Exception as e:
             pass
-    
     def _on_publish_failure(self, connection, callback_data): 
-        
         logger.error(f"Publish failed: {connection.host_name}")
         connection_logger.error(f"Publish failed: {connection.host_name}")
     
-    def _on_message_received(self, topic, payload, dup, qos, retain, **kwargs): 
+    
+    def _on_message_received(self, topic, payload:str, dup, qos, retain, **kwargs): 
+        #I'm not sure why it has to be done twice, but it does trust me..
+        payloadDecoded = json.loads(payload)
+        #check if message is from self
+        
+
+        
         self.messageCount += 1
         connection_logger.info(f"Received message from {topic}")
-        connection_logger.debug(f"Message contents: {payload.decode()}")
+        connection_logger.debug(f"Message contents: {payloadDecoded}")
         if self._message_callback:
-            self._message_callback(topic, payload)
-        
-        self.receivedMessageEvent.set()
+            self._message_callback(topic, payloadDecoded)
+
         
     
     

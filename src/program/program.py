@@ -10,7 +10,7 @@ from . import SensorLoggerWindow
 from . import MQTTLoggerWindow
 from . import START_TIME
 import os
-from mqtt import awtBroker, awtConnection, pingIP
+from mqtt import awtBroker, awtConnection, mqttBroker
 from multiprocessing import Process
 from program.Logger import getLogger
 
@@ -19,15 +19,15 @@ logger = getLogger("PROGRAM")
 class Program:
     #singleton instance
     __instance = None
-    def __new__(cls):
+    def __new__(cls, *args, **kwargs):
         if not hasattr(cls, '__ins'):
             print("Instance creating...")
             cls.__ins = super().__new__(cls)
         return cls.__ins
     
-    def __init__(self):
+    def __init__(self, mqttMode="mqtt"):
         self.startTime = START_TIME
-        
+        self.mqttMode = mqttMode
         self.loggerWindow = LoggerWindow(blacklist=["SENSOR_DATA", "MQTT_CONNECTION"])
         self.tempReadingWindow = SensorLoggerWindow()
         self.mqttWindow = MQTTLoggerWindow()
@@ -40,13 +40,20 @@ class Program:
         self.getAppData()
         
         #create connection object containing the data
-        self.awtConnection = awtConnection(
-            self.host,
-            self.cert,
-            self.privateKey,
-            self.rootCA
-        )
-        self.awtBroker = awtBroker(self.awtConnection, autoStart=False)
+        
+        if self.mqttMode == "mqtt":
+            self.mqttBroker = mqttBroker(autoStart=False)
+        else:
+            self.awtConnection = awtConnection(
+                self.host,
+                self.cert,
+                self.privateKey,
+                self.rootCA
+            )
+            
+            self.awtBroker = awtBroker(self.awtConnection, autoStart=False)
+        
+        
         self.sensor = DHTSensor()
         
         self.sensorThread = Thread(target=self.sensor.run)
@@ -57,24 +64,34 @@ class Program:
         self.programThread.start()
         self.loggerWindow.mainloop()
     
-
-    #program thread
-    def run(self):
+    def _runAWS(self):
         self.awtBroker.connect()
+        self.awtBroker.subscribe("test/topic")
+        self.awtBroker.subscribe("test/cmd")
         self.awtBroker.subscribe("test/testing")
         self.awtBroker.subscribe("test/sensor_data")
-        
-        self.awtBroker.publish("Hello World", "test/testing")
         
         while True:
             temperature = self.sensor.temperature
             humidity = self.sensor.humidity
-            
-            print(f"Temperature: {temperature}")
-            
-            self.awtBroker.publish(f"Temperature: {temperature}", "test/sensor_data")
-            
+            self.awtBroker.publishSensorData(temperature, humidity)
             time.sleep(1)
+    
+    def _runMQTT(self):
+        self.mqttBroker.connect()
+        self.mqttBroker.subscribe("test/topic")
+        while True:
+            temperature = self.sensor.temperature
+            humidity = self.sensor.humidity
+            self.mqttBroker.publishSensorData(temperature, humidity)
+            time.sleep(1)
+    
+    #program thread
+    def run(self):
+        if self.mqttMode == "mqtt":
+            self._runMQTT()
+        else:
+            self._runAWS()
             
         
     

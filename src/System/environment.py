@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from os import getenv, path
 import os
 import platform
-from socket import gethostname
+from platform import node
 from enum import Enum
 from program import START_TIME
 
@@ -63,7 +63,8 @@ class Environment:
     ARCHITECTURE:str = platform.architecture()[0]
     PYTHON_VERSION:str = platform.python_version()
     
-    DEVICE_NAME:str = gethostname()
+    DEVICE_NAME:str = node()
+    IDENTIFIER:str = f"{DEVICE_NAME}_python_mqtt"
     
     @classmethod
     def hasdht(cls) -> bool:
@@ -79,6 +80,10 @@ class Environment:
     def getDeviceName(cls) -> str:
         """Get the name of the device"""
         return cls.DEVICE_NAME
+    @classmethod
+    def getIdentifier(cls) -> str:
+        """Get the identifier of the device"""
+        return cls.IDENTIFIER
     @classmethod
     def getOS(cls) -> PLATFORM:
         """Get the platform the program is running on"""
@@ -146,7 +151,6 @@ class UnixDirectories:
 @dataclass
 class DIRECTORIES:
     """Class for directories\n
-
     Arguments:
         DATA_PATH: str - Path to the main data directory
         CONNECTION_DATA_PATH: str - Path to the connection data directory
@@ -156,16 +160,7 @@ class DIRECTORIES:
         LOGS_PATH: str - Path to the logs directory
         
     ***Arguments are platform dependent***\n
-    Use  os.path.join()  to join paths\n
-    Example:
-    ```python
-    from os import path
-    from program import DIRECTORIES
-    print(path.join(DIRECTORIES.DATA_PATH, "data"))
-    ```
     """
-    #arguments are platform dependent
-    #so are generated at runtime
 
     platform = Environment.getOS()
     if platform == Environment.PLATFORM.WINDOWS:
@@ -177,7 +172,6 @@ class DIRECTORIES:
         
         LOGS_PATH: str =                WindowsDirectories.LOGS_PATH
         SENSOR_DATA_PATH: str =         WindowsDirectories.SENSOR_DATA_PATH
-        
     elif platform == Environment.PLATFORM.LINUX | Environment.PLATFORM.RASPBERRY_PI:
         DATA_PATH: str =                UnixDirectories.DATA_PATH
         CONNECTION_DATA_PATH: str =     UnixDirectories.CONNECTION_DATA_PATH
@@ -187,6 +181,7 @@ class DIRECTORIES:
         
         LOGS_PATH: str =                UnixDirectories.LOGS_PATH
         SENSOR_DATA_PATH: str =         UnixDirectories.SENSOR_DATA_PATH
+
 @dataclass
 class FILES:
     HOST: str = path.join(DIRECTORIES.CONNECTION_DATA_PATH, "host.txt")
@@ -194,9 +189,8 @@ class FILES:
     PRIVATE_KEY: str = path.join(DIRECTORIES.CONNECTION_DATA_PATH, "certs", "private.pem.key")
     ROOT_CA: str = path.join(DIRECTORIES.CONNECTION_DATA_PATH, "certs", "ROOTCA1.pem")
     TOPICS: str = path.join(DIRECTORIES.CLIENT_DATA_PATH, "topics.txt")
-    
+
 @dataclass
 class INSTANCE_FILES:
     LOG_FILE: str = path.join(DIRECTORIES.LOGS_PATH, f"{START_TIME}_log.log")
-    
     SENSOR_DATA_FILE: str = path.join(DIRECTORIES.SENSOR_DATA_PATH, f"{START_TIME}_sensor_data.json")

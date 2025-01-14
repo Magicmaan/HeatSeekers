@@ -1,4 +1,4 @@
-from program import *
+from program import Program
 
-programInstance = Program()
+programInstance = Program(mqttMode="mqtt")
 print ("hi")

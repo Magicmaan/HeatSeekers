@@ -32,12 +32,11 @@ class DummySensor:
     
     def generateHumidity(self):
         self._humidity = 50 + 10 * cos(time() / 100)
-
+        
     @property
     def temperature(self):
         self.generateTemperature()
         return self._temperature
-    
     @temperature.setter
     def temperature(self, value):
         self._temperature = value
@@ -46,7 +45,6 @@ class DummySensor:
     def humidity(self):
         self.generateHumidity()
         return self._humidity
-    
     @humidity.setter
     def humidity(self, value):
         self._humidity = value

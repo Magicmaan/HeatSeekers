@@ -6,11 +6,11 @@ from tkinter import N, S, W, E
 from tkinter import messagebox
 from tkinterdnd2 import DND_FILES, TkinterDnD
 from System import Environment
-from mqtt import pingIP
+from Util.pingIP import pingIP
 from dataclasses import astuple
 from . import DIRECTORIES, FILES
 import os
-from program.Logger import getLogger
+from logging import getLogger
 
 
 logger = getLogger("SETUP")

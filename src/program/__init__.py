@@ -3,19 +3,19 @@ from os import path
 import platform
 from dataclasses import dataclass, asdict
 import time
-
 START_TIME:float = time.time()
 
 from System import Environment, DIRECTORIES, FILES, INSTANCE_FILES
+from .setup_program import SetupProgram
+SetupProgram()
+
 
 #TODO: distinguish between platforms for directories
-
-
 DATA_PATH = DIRECTORIES.DATA_PATH
 CONNECTION_DATA_PATH = DIRECTORIES.CONNECTION_DATA_PATH
 
 from .GUI.LoggerWindow import LoggerWindow, SensorLoggerWindow, MQTTLoggerWindow
-from .setup_program import SetupProgram
+
 from .program import Program
 
 __all__ = [
