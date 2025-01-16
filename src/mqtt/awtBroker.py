@@ -11,6 +11,7 @@ import threading
 from logging import DEBUG
 from program.Logger import getLogger
 from System.environment import Environment
+from .brokerBase import BrokerBase
 
 
 logger = getLogger("AWT_BROKER")
@@ -42,32 +43,22 @@ class connectionState:
 
 
     
-class awtBroker:   
+class awtBroker(BrokerBase):   
     """Class for AWT Broker connection
     
         If connection settings are provided, will connect on creation\n
         Otherwise, will need to call setConnectionArgs() then connect() to connect
     """
-    #TODO
-    #will take in amazon aws broker and return a connection
-    def __init__(self, connectArgs:awtConnection=None, autoStart:bool=False):
-        self.connectArgs = None
-        if connectArgs:
-            self.connectArgs = connectArgs
-        
+    def __init__(self, connectArgs: awtConnection = None, autoStart: bool = False):
+        super().__init__()
+        self.connectArgs = connectArgs
         self.MESSAGE = "Hello World"
         self.TOPIC = "test/testing"
-        
-        
-        self.messageCount = 0
-        self._message_callback = None
         self.connection = None
-        self.connectionState = connectionState.DISCONNECTED
         
         if self.connectArgs and autoStart:
-                self.connect()
+            self.connect()
 
-    
     def connect(self) -> None:
         """Connect to AWS broker\n
         Uses the connection settings provided to object"""
@@ -98,17 +89,15 @@ class awtBroker:
         
         # Make the connect() call
         connect_future = self.connection.connect()
-        # needed to make the connection, idk why
         connect_future.result(float(20))
         
         self.connectionState = connectionState.CONNECTED
-    
+
     def disconnect(self) -> None:
         disconnect_future = self.connection.disconnect()
         disconnect_future.result(float(1))
-        
         self.connectionState = connectionState.DISCONNECTED
-    
+
     def isConnected(self) -> bool:
         if self.connection and self.connectionState == connectionState.CONNECTED:
             return True
@@ -124,7 +113,7 @@ class awtBroker:
         assert not self.isConnected(), "Cannot change connection settings while connected"
         self.connectArgs = connectArgs
     
-    def publish(self, message: str, topic: str, messageRepeat: int=1):
+    def publish(self, payload: str, topic: str, messageRepeat: int=1):
         """Publish message to desired topic"""
         assert self.isConnected(), "Not connected"
         assert messageRepeat > 0
@@ -133,17 +122,13 @@ class awtBroker:
         for i in range (messageRepeat):
             #assemmble message into a json
             result = self.connection.publish(topic=      topic, 
-                                            payload=     message, 
-                                            qos=         mqtt.QoS.AT_LEAST_ONCE,)
+                                            payload=     payload, 
+                                            qos=         0)
             connection_logger.info(f"Publishing message to {topic}")
-            connection_logger.debug(f"Message contents: {message}")
+            connection_logger.debug(f"Message contents: {payload}")
             result[0].add_done_callback(self._on_publish_success)
 
 
-    def publishSensorData(self, temperature: float, humidity: float, units: list[str,str] = ["C","%"]):
-        """Publish sensor data"""
-        data = newSensorPacket(temperature, humidity, units=units, identifier=self.connectArgs.client_id)
-        self.publish(data, "test/sensor_data")
     
     def subscribe(self, topic: str):
         assert self.isConnected()
@@ -174,7 +159,6 @@ class awtBroker:
         try:
             future.result()
             connection_logger.debug("Publish successful")
-            
         except Exception as e:
             pass
     def _on_publish_failure(self, connection, callback_data): 
@@ -187,14 +171,12 @@ class awtBroker:
         payloadDecoded = json.loads(payload)
         #check if message is from self
         
-
-        
         self.messageCount += 1
         connection_logger.info(f"Received message from {topic}")
         connection_logger.debug(f"Message contents: {payloadDecoded}")
         if self._message_callback:
             self._message_callback(topic, payloadDecoded)
 
-        
-    
-    
+
+
+

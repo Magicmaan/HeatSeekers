@@ -1,9 +1,8 @@
 # HeatSeekers
 
 Using Python
- hhhh
-
+hhhh
 
 Raspberry pi
-DHT22 sensor 
+DHT22 sensor
 4.7k ohm resistor

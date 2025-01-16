@@ -1,10 +1,13 @@
 from dataclasses import dataclass
+from datetime import datetime
 from os import getenv, path
 import os
 import platform
 from platform import node
 from enum import Enum
 from program import START_TIME
+
+readableStartTime = datetime.fromtimestamp(START_TIME).strftime('%Y%m%d_%H%M%S')
 
 class Environment:
     """Class to identify the platform the program is running on.
@@ -192,5 +195,5 @@ class FILES:
 
 @dataclass
 class INSTANCE_FILES:
-    LOG_FILE: str = path.join(DIRECTORIES.LOGS_PATH, f"{START_TIME}_log.log")
-    SENSOR_DATA_FILE: str = path.join(DIRECTORIES.SENSOR_DATA_PATH, f"{START_TIME}_sensor_data.json")
+    LOG_FILE: str = path.join(DIRECTORIES.LOGS_PATH, f"{readableStartTime}_log.log")
+    SENSOR_DATA_FILE: str = path.join(DIRECTORIES.SENSOR_DATA_PATH, f"{readableStartTime}_sensor_data.json")

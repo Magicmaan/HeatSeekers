@@ -126,16 +126,16 @@ class SetupProgram(ttk.Frame):
     
     def saveData(self, hostname:str, clientname:str, certPath:str, keyPath:str, caPath:str):
         """write hostname, clientname, certPath, keyPath, caPath to files"""
-        with open(FILES.HOST, 'w') as f:
-            f.write(hostname)
-        with open(FILES.CERTIFICATE, 'w') as f:
-            f.write(certPath)
-        with open(FILES.PRIVATE_KEY, 'w') as f:
-            f.write(keyPath)
-        with open(FILES.ROOT_CA, 'w') as f:
-            f.write(caPath)
-        with open(FILES.TOPICS, 'w') as f:
-            f.write(clientname)
+        with open(FILES.HOST, 'w') as file:
+            file.write(hostname)
+        with open(FILES.CERTIFICATE, 'w') as file:
+            file.write(certPath)
+        with open(FILES.PRIVATE_KEY, 'w') as file:
+            file.write(keyPath)
+        with open(FILES.ROOT_CA, 'w') as file:
+            file.write(caPath)
+        with open(FILES.TOPICS, 'w') as file:
+            file.write(clientname)
 
     
     def setupDragDrop(self):

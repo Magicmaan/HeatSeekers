@@ -1,7 +1,11 @@
+from datetime import datetime
+import json
 from threading import Thread
 import time
 
-from pi_interface import DHTSensor
+from Util.logUtil import concatenateSensorLogs, getSensorLogsDate
+from mqtt.Templates.testpackages import _blankPacket, newResponsePacket, newStatePacket
+from pi_interface import DHTSensor, DummyThermostat
 from .Logger import getSensorLogger
 from . import DIRECTORIES,DATA_PATH, FILES
 from . import SetupProgram
@@ -15,6 +19,10 @@ from multiprocessing import Process
 from program.Logger import getLogger
 
 logger = getLogger("PROGRAM")
+# def _onMessageReceived(str1, str2):
+#     print(f"Message received: {str1} - {str2}")
+#     logger.info(f"Message received: ")
+    
 
 class Program:
     #singleton instance
@@ -40,9 +48,9 @@ class Program:
         self.getAppData()
         
         #create connection object containing the data
-        
+        self.broker = None
         if self.mqttMode == "mqtt":
-            self.mqttBroker = mqttBroker(autoStart=False)
+            self.broker = mqttBroker(autoStart=False, onMessageReceived=self.onMessageReceived)
         else:
             self.awtConnection = awtConnection(
                 self.host,
@@ -51,10 +59,11 @@ class Program:
                 self.rootCA
             )
             
-            self.awtBroker = awtBroker(self.awtConnection, autoStart=False)
+            self.broker = awtBroker(self.awtConnection, autoStart=False)
         
-        
-        self.sensor = DHTSensor()
+        self.publishInterval = 10
+        self.sensor = DHTSensor(useDummy=True)
+        self.thermostat = DummyThermostat()
         
         self.sensorThread = Thread(target=self.sensor.run)
         self.programThread = Thread(target=self.run)
@@ -64,37 +73,92 @@ class Program:
         self.programThread.start()
         self.loggerWindow.mainloop()
     
-    def _runAWS(self):
-        self.awtBroker.connect()
-        self.awtBroker.subscribe("test/topic")
-        self.awtBroker.subscribe("test/cmd")
-        self.awtBroker.subscribe("test/testing")
-        self.awtBroker.subscribe("test/sensor_data")
-        
-        while True:
-            temperature = self.sensor.temperature
-            humidity = self.sensor.humidity
-            self.awtBroker.publishSensorData(temperature, humidity)
-            time.sleep(1)
-    
-    def _runMQTT(self):
-        self.mqttBroker.connect()
-        self.mqttBroker.subscribe("test/topic")
-        while True:
-            temperature = self.sensor.temperature
-            humidity = self.sensor.humidity
-            self.mqttBroker.publishSensorData(temperature, humidity)
-            time.sleep(1)
-    
+    def onMessageReceived(self, topic: str, payload: dict):
+        # message format:
+        # {
+        #   "command": "set_temperature_medium_bound",
+        #   "value": 0.0
+        # }
+        # get messages from topic command
+        if topic.lower().find("command") != -1:
+            command = payload.get("command", "")
+            if command == "" or command == None:
+                logger.error(f"Command not found in payload: {payload}")
+                return
+            logger.info(f"Command received: {command}")
+            
+            
+            if command.lower().find("stop") != -1:
+                self.stop()
+            elif command.lower().find("start") != -1:
+                self.start()
+            # send state
+            if command.lower().find("state") != -1:
+                logger.info(f"Sending state: {self.thermostat.getState()}")
+                packet = newStatePacket(self.sensor.getState(), self.thermostat.getState())
+                self.broker.publish(packet, "test/response")
+
+            # set desired temperature
+            if command.lower().find("set_desired_temperature") != -1:
+                logger.info(f"Setting desired temperature to {payload.get('value',self.thermostat.desiredTemperature)}")
+                self.thermostat.setDesiredTemperature(
+                    desired=payload.get("value", self.thermostat.desiredTemperature),
+                )
+                # respond with new state
+                packet = newStatePacket(self.sensor.getState(), self.thermostat.getState())
+                self.broker.publish(packet, "test/sensor_data")
+            
+            # set temperature mode
+            if command.lower().find("set_temperature_mode") != -1:
+                logger.info(f"Setting temperature mode to {payload.get('value', self.thermostat.temperatureMode)}")
+                self.thermostat.setMode(
+                    mode=payload.get("value", self.thermostat.temperatureMode)
+                )
+                # respond with new state
+                packet = newStatePacket(self.sensor.getState(), self.thermostat.getState())
+                self.broker.publish(packet, "test/sensor_data")
+            
+            if command.lower().find("get_history") != -1:
+                day = payload.get('value', datetime.now().strftime('%Y%m%d'))
+                logger.info(f"Getting history for {day}")
+                
+                files = getSensorLogsDate(day)
+                if not files:
+                    return
+                
+                #data = concatenateSensorLogs([os.path.join(DIRECTORIES.SENSOR_DATA_PATH, "input.json")], "hour")
+                #print(data)
+                data = concatenateSensorLogs(files, "hour")
+                logger.debug(f"Data: {data}")
+                # with open(os.path.join(DIRECTORIES.SENSOR_DATA_PATH, 'text.json'), 'w') as f:
+                #     for entry in data:
+                #         f.write(json.dumps(entry) + '\n')
+                
+                packet = newResponsePacket(json.dumps(data), "get_history", day)
+                self.broker.publish(packet, "test/response")
+                #DIRECTORIES.SENSOR_DATA_PATH
+   
+   
     #program thread
     def run(self):
-        if self.mqttMode == "mqtt":
-            self._runMQTT()
-        else:
-            self._runAWS()
-            
-        
+        self.broker.connect()
+        self.broker.subscribe("test/topic")
+        self.broker.subscribe("test/command")
+        self.broker.subscribe("test/response")
+        self.broker.subscribe("test/testing")
+        while True:
+            temperature = self.sensor.temperature
+            humidity = self.sensor.humidity
+            self.thermostat.update(temperature, humidity)
+
+            if (self.sensor.useDummy):
+                self.sensor.setThermostatState(self.thermostat.state)
+            #if int(time.time()) % self.publishInterval == 0:
+            packet = newStatePacket(self.sensor.getState(), self.thermostat.getState())
+            self.broker.publish(packet, "test/sensor_data")
     
+            time.sleep(self.publishInterval)
+            
     def getRuntime(self) -> float:
         """Get the runtime of the program"""
         return time.time() - self.startTime

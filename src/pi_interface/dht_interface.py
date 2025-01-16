@@ -10,10 +10,11 @@ from collections import deque
 from datetime import datetime
 from System import INSTANCE_FILES
 from Util.data import predictFutureValue, getAverageData
+from pi_interface.thermostat_interface import State as thermostatState
 from program.Logger import getSensorLogger, getLogger
 
 
-logger = getLogger("DHTSensor")
+logger = getLogger()
 sensorDataLogger = getSensorLogger()
 
 try:
@@ -26,9 +27,10 @@ class DummySensor:
     def __init__(self):
         self._temperature = 20
         self._humidity = 50
-    
+        
     def generateTemperature(self):
-        self._temperature = 20 + 5 * sin(time() / 100)
+        #testing interface to respond to heating / cooling
+        self._temperature = 20 + 5 * sin(time() / 10)
     
     def generateHumidity(self):
         self._humidity = 50 + 10 * cos(time() / 100)
@@ -67,7 +69,11 @@ class DHTSensor:
     """
     #TODO
     def __init__(self, useDummy:bool=False):
-        logger.info("-"*10 + "\nInitializing DHT Sensor")
+        logger.info("Initializing DHT Sensor")
+        # initialize the sensor
+        # if useDummy is True, use a dummy sensor
+        # if not on raspberry pi, use a dummy sensor
+        # if no dht sensor, use a dummy sensor
         if not useDummy:
             logger.debug("Attempting to initialize sensor")
             hasSensor = True
@@ -84,8 +90,10 @@ class DHTSensor:
             self.sensor = DummySensor()
             logger.info("Using dummy sensor")
 
+        self.useDummy = useDummy
+        self.thermostatState = thermostatState.OFF
         #how often to query the sensor in seconds
-        self.queryInterval:int = 1
+        self.queryInterval:int = 10
         self.lastQueryTime:float = time()
         
 
@@ -96,7 +104,9 @@ class DHTSensor:
         self.humidity:float = 0
     
 
-    
+    def setThermostatState(self, state:thermostatState):
+        self.thermostatState = state
+
     def getData(self) -> tuple[float, float]:
         """Get the last temperature and humidity readings"""
         return list(self.dataCache)
@@ -123,14 +133,36 @@ class DHTSensor:
         except Exception as e:
             #happens often
             logger.error(f"Error querying sensor: {e}")
-        
-        return None, None
+
+    
+    def getState(self) -> dict:
+        """Get the state of the sensor"""
+        return {
+            "temperature": round(self.temperature,1),
+            "humidity": round(self.humidity,0),
+            "units": {
+                "temperature": "C",
+                "humidity": "%"
+            }
+        }
     
     def run(self):
         #main sensor loop to constantly query the sensor
         while True:
+            #if use dummy, simulate heating / cooling
+            if self.useDummy:
+                if self.thermostatState == thermostatState.HEATING:
+                    logger.debug("Heating artificially")
+                    temperatureData = self.temperature + 0.5
+                elif self.thermostatState == thermostatState.COOLING:
+                    logger.debug("Cooling artificially")
+                    temperatureData = self.temperature - 0.5
+                else:
+                    temperatureData, humidityData = self.querySensor()
+            else:
+                temperatureData, humidityData = self.querySensor()
             #query the sensor for data
-            temperatureData, humidityData = self.querySensor()
+            
             #if data is returned
             if temperatureData and humidityData: 
                 self.lastQueryTime = time()
@@ -142,7 +174,7 @@ class DHTSensor:
                 self.dataCache.append([self.lastQueryTime, self.temperature, self.humidity])
                 #log the data to the sensor data file
                 msg = {
-                    "timestamp": datetime.now().time().__str__(),  
+                    "timestamp": datetime.now().strftime("%H:%M:%S"),  
                     "temperature": round(self.temperature, 2), 
                     "humidity": round(self.humidity, 2),
                     "predicted_temperature": round(predictFutureValue(self.dataCache, 10), 2),
