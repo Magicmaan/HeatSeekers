@@ -25,14 +25,16 @@ class SetupProgram(ttk.Frame):
     directories = astuple(DIRECTORIES())
     files = astuple(FILES())
     
-    
-    def __init__(self, root: Widget=None):
+    # mqttMode "mqtt" or "awt"
+    # if mqtt, dont check for credentials etc, instead ask for broker
+    # if awt, check for credentials aka normal flow state
+    def __init__(self, root: Widget=None, mqttMode="mqtt"):
         if not root:
             root = TkinterDnD.Tk()
             root.title("Setup")
         super().__init__(root,padding=10)
         self.root = root
-        
+        self.mqttMode = mqttMode
         
         self.setupState = SETUP_STATE.VERIFY
         appDataState, missingDirectories, missingFiles = self.verifyAppData()
@@ -106,14 +108,15 @@ class SetupProgram(ttk.Frame):
         ttk.Label(self, text="Device Name: (leave empty to use device name)").pack()
         self.clientname = ttk.Entry(self, width=75); self.clientname.pack()
         
-        ttk.Label(self, text="Certificate:").pack()
-        self.certPath = ttk.Entry(self, width=75); self.certPath.pack()
-        
-        ttk.Label(self, text="Private Key:").pack()
-        self.keyPath = ttk.Entry(self, width=75); self.keyPath.pack()
-        
-        ttk.Label(self, text="Root CA:").pack()
-        self.caPath = ttk.Entry(self, width=75); self.caPath.pack()
+        if self.mqttMode == "aws":
+            ttk.Label(self, text="Certificate:").pack()
+            self.certPath = ttk.Entry(self, width=75); self.certPath.pack()
+            
+            ttk.Label(self, text="Private Key:").pack()
+            self.keyPath = ttk.Entry(self, width=75); self.keyPath.pack()
+            
+            ttk.Label(self, text="Root CA:").pack()
+            self.caPath = ttk.Entry(self, width=75); self.caPath.pack()
         
         ttk.Button(self, text="Confirm",command=self.on_confirm).pack()
     
@@ -124,10 +127,11 @@ class SetupProgram(ttk.Frame):
                 logger.debug(f"Creating directory: {d}")
                 os.makedirs(d,exist_ok=True)
     
-    def saveData(self, hostname:str, clientname:str, certPath:str, keyPath:str, caPath:str):
+    def saveData(self, hostname:str, clientname:str, certPath:str="", keyPath:str="", caPath:str=""):
         """write hostname, clientname, certPath, keyPath, caPath to files"""
         with open(FILES.HOST, 'w') as file:
             file.write(hostname)
+       
         with open(FILES.CERTIFICATE, 'w') as file:
             file.write(certPath)
         with open(FILES.PRIVATE_KEY, 'w') as file:
@@ -143,12 +147,14 @@ class SetupProgram(ttk.Frame):
         self.clientname.dnd_bind('<<Drop>>', self.drop_clientname)
         self.hostname.drop_target_register(DND_FILES)
         self.hostname.dnd_bind('<<Drop>>', self.drop_hostname)
-        self.certPath.drop_target_register(DND_FILES)
-        self.certPath.dnd_bind('<<Drop>>', self.drop_certPath)
-        self.keyPath.drop_target_register(DND_FILES)
-        self.keyPath.dnd_bind('<<Drop>>', self.drop_keyPath)
-        self.caPath.drop_target_register(DND_FILES)
-        self.caPath.dnd_bind('<<Drop>>', self.drop_caPath)
+        
+        if self.mqttMode == "aws":
+            self.certPath.drop_target_register(DND_FILES)
+            self.certPath.dnd_bind('<<Drop>>', self.drop_certPath)
+            self.keyPath.drop_target_register(DND_FILES)
+            self.keyPath.dnd_bind('<<Drop>>', self.drop_keyPath)
+            self.caPath.drop_target_register(DND_FILES)
+            self.caPath.dnd_bind('<<Drop>>', self.drop_caPath)
     
     def drop_clientname(self,event):
         f = self.getDropFileContents(event)
@@ -216,19 +222,22 @@ class SetupProgram(ttk.Frame):
         if not self.validate_clientname():
             return
         
-        
-        if not self.certPath.get():
-            messagebox.showerror("Error", "Please enter a certificate path")
-            return
-        if not self.keyPath.get():
-            messagebox.showerror("Error", "Please enter a private key path")
-            return
-        if not self.caPath.get():
-            messagebox.showerror("Error", "Please enter a Root CA path")
-            return
-        
+        if self.mqttMode == "aws":
+            if not self.certPath.get():
+                messagebox.showerror("Error", "Please enter a certificate path")
+                return
+            if not self.keyPath.get():
+                messagebox.showerror("Error", "Please enter a private key path")
+                return
+            if not self.caPath.get():
+                messagebox.showerror("Error", "Please enter a Root CA path")
+                return
+            
         self.setupDirectory()
-        self.saveData(self.hostname.get(), self.clientname.get(), self.certPath.get(), self.keyPath.get(), self.caPath.get())
+        if self.mqttMode == "aws":
+            self.saveData(self.hostname.get(), self.clientname.get(), self.certPath.get(), self.keyPath.get(), self.caPath.get())
+        else:
+            self.saveData(self.hostname.get(), self.clientname.get())
         self.root.destroy()
         
 if __name__ == "__main__":

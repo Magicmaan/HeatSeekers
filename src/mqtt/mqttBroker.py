@@ -34,6 +34,7 @@ class mqttBroker(BrokerBase):
         Otherwise, will need to call connect() to connect
     """
     def __init__(self, 
+                 hostname: str = "localhost",
                  autoStart: bool = False, 
                  onMessageReceived: callable = None, 
                  onConnect: callable = None, 
@@ -44,7 +45,7 @@ class mqttBroker(BrokerBase):
         self.MESSAGE = "Hello World"
         self.TOPIC = "test/testing"
         self.messageCount = 0
-        
+        self.hostname = hostname
         self._message_callback = onMessageReceived
 
         self.connection = mqtt.Client()
@@ -62,7 +63,7 @@ class mqttBroker(BrokerBase):
         self.connection.on_message = self._on_message_received
         
         logger.info('Connecting to localhost...')
-        self.connection.connect("localhost", 1883, 60)
+        self.connection.connect(self.hostname, 1883, 60)
         self.connection.loop_start()
         self.connectionState = connectionState.CONNECTED
     

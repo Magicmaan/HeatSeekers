@@ -132,7 +132,6 @@ class WindowsDirectories:
     SENSOR_DATA_PATH: str = path.join(CLIENT_DATA_PATH, 'sensor_data')
     
 class UnixDirectories:
-    #TODO: Add UNIX directories
     """Internal Class for UNIX directories\n
     Arguments:
         DATA_PATH: str - Path to the main data directory
@@ -141,15 +140,15 @@ class UnixDirectories:
         CERTS_PATH: str - Path to the certificates directory
         CLIENT_DATA_PATH: str - Path to the client data directory
         LOGS_PATH: str - Path to the logs directory"""
-    # TODO: Add UNIX directories
-    DATA_PATH: str = None
-    CONNECTION_DATA_PATH: str = None
-    MQTT_PATH: str = None
-    CERTS_PATH: str = None
-    CLIENT_DATA_PATH: str = None
-    LOGS_PATH: str = None
+        
+    DATA_PATH: str = path.join(getenv('HOME') or " ", '.heatseekers')
+    CONNECTION_DATA_PATH: str = path.join(DATA_PATH, 'mqtt')
+    MQTT_PATH: str = path.join(DATA_PATH, 'mqtt')
+    CERTS_PATH: str = path.join(MQTT_PATH, 'certs')
+    CLIENT_DATA_PATH: str = path.join(DATA_PATH, 'data')
+    LOGS_PATH: str = path.join(CLIENT_DATA_PATH, 'logs')
     
-    SENSOR_DATA_PATH: str = None
+    SENSOR_DATA_PATH: str = path.join(CLIENT_DATA_PATH, 'sensor_data')
 
 @dataclass
 class DIRECTORIES:

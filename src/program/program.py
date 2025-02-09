@@ -1,4 +1,5 @@
 from datetime import datetime
+
 import json
 from threading import Thread
 import time
@@ -24,6 +25,27 @@ logger = getLogger("PROGRAM")
 #     logger.info(f"Message received: ")
     
 
+"""
+A class to represent the main program.
+Attributes
+----------
+mqttMode : str
+    The mode of MQTT connection, either "mqtt" or "awt".
+Methods
+-------
+__new__(cls, *args, **kwargs):
+    Creates a singleton instance of the Program class.
+__init__(self, mqttMode="mqtt"):
+    Initializes the Program with the specified MQTT mode.
+onMessageReceived(self, topic: str, payload: dict):
+    Handles incoming MQTT messages and executes commands based on the payload.
+run(self):
+    The main program loop that updates sensor data and publishes it to the MQTT broker.
+getRuntime(self) -> float:
+    Returns the runtime of the program.
+getAppData(self):
+    Retrieves application data such as host, certificate, private key, and root CA.
+"""
 class Program:
     #singleton instance
     __instance = None
@@ -39,10 +61,9 @@ class Program:
         self.loggerWindow = LoggerWindow(blacklist=["SENSOR_DATA", "MQTT_CONNECTION"])
         self.tempReadingWindow = SensorLoggerWindow()
         self.mqttWindow = MQTTLoggerWindow()
-        
         logger.info(f"Program started")
         #setup program / data
-        SetupProgram()
+        SetupProgram(mqttMode=mqttMode)
         #get app data
         #includes connection data, etc
         self.getAppData()
@@ -50,8 +71,10 @@ class Program:
         #create connection object containing the data
         self.broker = None
         if self.mqttMode == "mqtt":
-            self.broker = mqttBroker(autoStart=False, onMessageReceived=self.onMessageReceived)
-        else:
+            logger.info(f"Using MQTT local broker")
+            self.broker = mqttBroker(self.host, autoStart=False, onMessageReceived=self.onMessageReceived)
+        elif self.mqttMode == "awt":
+            logger.info(f"Using AWS IoT broker")
             self.awtConnection = awtConnection(
                 self.host,
                 self.cert,
@@ -169,9 +192,10 @@ class Program:
         
         with open(files.HOST, 'r') as f:
             self.host = f.read()
-        self.cert = files.CERTIFICATE
-        self.privateKey = files.PRIVATE_KEY
-        self.rootCA = files.ROOT_CA
+        if self.mqttMode == "aws":
+            self.cert = files.CERTIFICATE
+            self.privateKey = files.PRIVATE_KEY
+            self.rootCA = files.ROOT_CA
         
 
 
