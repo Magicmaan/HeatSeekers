@@ -48,9 +48,22 @@ HeatSeekers is a Python program designed to monitor temperature and humidity usi
    - If using AWS, either paste in or drag and drop the required files.
 
 6. Run the program:
-   ```sh
-   python main.py
-   ```
+
+   You can either use the `run.bat` script or run the components individually:
+
+   - Using `run.bat` script:
+
+     ```sh
+     .\run.bat
+     ```
+
+   - Individually:
+     ```sh
+     python main.py
+     node-red path/.node-red/flows.json
+     ```
+
+7. Run NodeRed.bat
 
 Raspberry pi
 DHT22 sensor
