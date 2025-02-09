@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import json
+import sys
 from threading import Thread
 import time
 
@@ -58,9 +59,10 @@ class Program:
     def __init__(self, mqttMode="mqtt"):
         self.startTime = START_TIME
         self.mqttMode = mqttMode
-        self.loggerWindow = LoggerWindow(blacklist=["SENSOR_DATA", "MQTT_CONNECTION"])
-        self.tempReadingWindow = SensorLoggerWindow()
-        self.mqttWindow = MQTTLoggerWindow()
+        self.loggerWindow = LoggerWindow(blacklist=["SENSOR_DATA", "MQTT_CONNECTION"], exit=self.exit)
+        self.tempReadingWindow = SensorLoggerWindow( exit=self.exit)
+        self.mqttWindow = MQTTLoggerWindow( exit=self.exit)
+        self.isRunning = True
         logger.info(f"Program started")
         #setup program / data
         SetupProgram(mqttMode=mqttMode)
@@ -88,7 +90,7 @@ class Program:
         self.sensor = DHTSensor(useDummy=True)
         self.thermostat = DummyThermostat()
         
-        self.sensorThread = Thread(target=self.sensor.run)
+        self.sensorThread = Thread(target=self.sensor.run, args=([self.isRunning]))
         self.programThread = Thread(target=self.run)
 
         #start program thread
@@ -169,7 +171,7 @@ class Program:
         self.broker.subscribe("test/command")
         self.broker.subscribe("test/response")
         self.broker.subscribe("test/testing")
-        while True:
+        while self.isRunning:
             temperature = self.sensor.temperature
             humidity = self.sensor.humidity
             self.thermostat.update(temperature, humidity)
@@ -181,6 +183,8 @@ class Program:
             self.broker.publish(packet, "test/sensor_data")
     
             time.sleep(self.publishInterval)
+        
+        self.broker.disconnect()
             
     def getRuntime(self) -> float:
         """Get the runtime of the program"""
@@ -196,6 +200,14 @@ class Program:
             self.cert = files.CERTIFICATE
             self.privateKey = files.PRIVATE_KEY
             self.rootCA = files.ROOT_CA
+    
+    def exit(self):
+        self.isRunning = False
+        self.loggerWindow.quit()
+        self.tempReadingWindow.quit()
+        self.mqttWindow.quit()
+        print("Program stopped")
+        os._exit(1)
         
 
 

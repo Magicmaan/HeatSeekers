@@ -8,6 +8,7 @@ from logging import Handler, LogRecord
 import tkinter as tk
 
 from program.Logger import getLogger, logFormatter
+import sys
 
 
 _logger = getLogger()
@@ -46,7 +47,7 @@ class LoggerWindow(ttk.Frame):
         isTopLevel():
             Checks if the root widget is a Toplevel widget.
     """
-    def __init__(self, root: Widget=None, loggerName:str = None, blacklist:list=None, format:str = None):
+    def __init__(self, root: Widget=None, loggerName:str = None, blacklist:list=None, format:str = None, exit=None):
         if not root:
             root = Tk()
         super().__init__(root)
@@ -54,6 +55,7 @@ class LoggerWindow(ttk.Frame):
         #set title
         self.title = loggerName if loggerName else "Debug Logger"
         self.root.title(self.title)
+        self.exitFunction = exit
         
         # get the logger if name is provided, else use root logger
         self.logger = getLogger(loggerName) if loggerName else _logger
@@ -72,7 +74,7 @@ class LoggerWindow(ttk.Frame):
         #setup log level feedback for radiobuttons
         self.logLevel:StringVar = StringVar()
         self.logLevel.set("DEBUG")
-        self._setLogLevel()
+        self._setLogLevelDebug()
         
         # blacklist of loggers to exclude from window
         self.loggerBlacklist = blacklist if blacklist else [""]
@@ -103,13 +105,13 @@ class LoggerWindow(ttk.Frame):
         bar.grid(column=0, row=0, columnspan=1, rowspan=1, sticky=(N, S, W, E))
         
         #buttons for the top bar
-        ttk.Button(bar, text="Quit", command=self.root.destroy).grid(column=1, row=0)
+        ttk.Button(bar, text="Quit", command=self._quitProgram).grid(column=1, row=0)
         ttk.Button(bar, text="Log", command=self.log).grid(column=2, row=0)
         ttk.Checkbutton(bar, text="Log to terminal", command=self.toggleLogToTerminal).grid(column=3, row=0)
         
         #radiobuttons for log level
-        ttk.Radiobutton(bar, text="Debug", variable=self.logLevel, value="DEBUG", command=self._setLogLevel).grid(column=5, row=0)
-        ttk.Radiobutton(bar, text="Info", variable=self.logLevel, value="INFO", command=self._setLogLevel).grid(column=6, row=0)
+        ttk.Radiobutton(bar, text="Debug", variable=self.logLevel, value="DEBUG", command=self._setLogLevelDebug).grid(column=5, row=0)
+        ttk.Radiobutton(bar, text="Info", variable=self.logLevel, value="INFO", command=self._setLogLevelInfo).grid(column=6, row=0)
         ttk.Radiobutton(bar, text="Warning", variable=self.logLevel, value="WARNING", command=self._setLogLevel).grid(column=7, row=0)
         ttk.Radiobutton(bar, text="Error", variable=self.logLevel, value="ERROR", command=self._setLogLevel).grid(column=8, row=0)
         
@@ -129,21 +131,44 @@ class LoggerWindow(ttk.Frame):
         self.scrollPane.tag_config('ERROR', foreground='red')
         self.scrollPane.tag_config('CRITICAL', foreground='red', underline=1)
     
-
+    def quit(self):
+        self.root.destroy()
+        self.root.quit()
+    
+    def _quitProgram(self):
+        self.exitFunction()
+    
     def toggleLogToTerminal(self):
         self._logToTerminal = not self._logToTerminal
         
     def _setLogLevel(self):
         """Internal function to set the log level of the logger.
             Used for radiobuttons"""
-        self.logger.setLevel(self.logLevel.get())
-        self.queueHandler.setLevel(self.logLevel.get())
+        # self.logger.setLevel(self.logLevel.get())
+        # self.queueHandler.setLevel(self.logLevel.get())
+        pass
     
+    def _setLogLevelDebug(self):
+        #print("Setting log level to debug")
+        self.logger.setLevel(10)
+        self.queueHandler.setLevel(10)
+        self.logLevel.set("DEBUG")
+    
+    def _setLogLevelInfo(self):
+        #print("Setting log level to info")
+        self.logger.setLevel(20)
+        self.queueHandler.setLevel(20)
+        self.logLevel.set("INFO")
         
     def display(self, record: LogRecord):
         """Display a log record in the scrolled text widget"""
         # if name in blacklist, discard
         if record.name in self.loggerBlacklist:
+            return
+        #print("log level: ", record.levelname, record.levelno)
+        #print("Logger level: ", self.logger.level)
+        # if the log level is not appropriate, discard
+        if record.levelno < self.logger.level:
             return
 
         # format the record
@@ -184,10 +209,10 @@ class LoggerWindow(ttk.Frame):
         return isinstance(self.root, Toplevel)
 
 class MQTTLoggerWindow(LoggerWindow):
-    def __init__(self):
-        super().__init__(None, "MQTT_CONNECTION")
+    def __init__(self, exit=None):
+        super().__init__(None, "MQTT_CONNECTION", exit=exit)
 
 class SensorLoggerWindow(LoggerWindow):
-    def __init__(self):
-        super().__init__(None, "SENSOR_DATA",format='%(message)s')
+    def __init__(self, exit=None):
+        super().__init__(None, "SENSOR_DATA",format='%(message)s', exit=exit)
         

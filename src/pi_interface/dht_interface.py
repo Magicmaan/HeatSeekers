@@ -146,9 +146,9 @@ class DHTSensor:
             }
         }
     
-    def run(self):
+    def run(self, isRunning:bool):
         #main sensor loop to constantly query the sensor
-        while True:
+        while isRunning:
             #if use dummy, simulate heating / cooling
             if self.useDummy:
                 if self.thermostatState == thermostatState.HEATING:
