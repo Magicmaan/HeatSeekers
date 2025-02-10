@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import json
 import sys
@@ -144,24 +144,66 @@ class Program:
                 self.broker.publish(packet, "test/sensor_data")
             
             if command.lower().find("get_history") != -1:
-                day = payload.get('value', datetime.now().strftime('%Y%m%d'))
-                logger.info(f"Getting history for {day}")
+                dayRange = payload.get('value', datetime.now().strftime('%Y%m%d'))
                 
-                files = getSensorLogsDate(day)
-                if not files:
-                    return
+                if type(dayRange) == dict:
+                    start = dayRange.get('start', None)
+                    end = dayRange.get('end', None)
+                    if start == None or end == None:
+                        logger.error(f"Invalid day range: {dayRange}")
+                        return
+                    logger.info(f"Getting history for day range: {start} - {end}")
+                    startDateObj = datetime.strptime(start, '%Y%m%d')
+                    endDateObj = datetime.strptime(end, '%Y%m%d')
+                    
+                    days = []
+                    data = {}
+                    for i in range((endDateObj - startDateObj).days + 1):
+                        #get date between start and end
+                        day = (startDateObj + timedelta(days=i)).strftime('%Y%m%d')
+                        
+                        dayData = getSensorLogsDate(day)
+                        if not dayData:
+                            logger.error(f"No files found for {day}")
+                            dayData = []
+                            continue
+                        
+                        
+                        data[day] = concatenateSensorLogs(dayData, "hour")
+                        days.append(dayData)
+                        
+                    
+                    if not days:
+                        logger.error(f"No data found for days: {days}")
+                        return
+                    
+                    # flatten list
+                    
+                    
+                    files = []
+                    for day in days:
+                        files.append
+                     
+                elif type(dayRange) == str:
+                    day = dayRange
+                    logger.info(f"Getting history for {day}")
+                    
+                    files = getSensorLogsDate(day)
+                    if not files:
+                        logger.error(f"No files found for {day}")
+                        
+                    
+                    data = concatenateSensorLogs(files, "hour")
                 
-                #data = concatenateSensorLogs([os.path.join(DIRECTORIES.SENSOR_DATA_PATH, "input.json")], "hour")
-                #print(data)
-                data = concatenateSensorLogs(files, "hour")
                 logger.debug(f"Data: {data}")
                 # with open(os.path.join(DIRECTORIES.SENSOR_DATA_PATH, 'text.json'), 'w') as f:
                 #     for entry in data:
                 #         f.write(json.dumps(entry) + '\n')
                 
+                
                 packet = newResponsePacket(json.dumps(data), "get_history", day)
                 self.broker.publish(packet, "test/response")
-                #DIRECTORIES.SENSOR_DATA_PATH
+
    
    
     #program thread

@@ -8,655 +8,6 @@
         "env": []
     },
     {
-        "id": "e44bf60c40d011d0",
-        "type": "ui_base",
-        "theme": {
-            "name": "theme-light",
-            "lightTheme": {
-                "default": "#0094CE",
-                "baseColor": "#0094CE",
-                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
-                "edited": true,
-                "reset": false
-            },
-            "darkTheme": {
-                "default": "#097479",
-                "baseColor": "#097479",
-                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
-                "edited": false
-            },
-            "customTheme": {
-                "name": "Untitled Theme 1",
-                "default": "#4B7930",
-                "baseColor": "#4B7930",
-                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
-            },
-            "themeState": {
-                "base-color": {
-                    "default": "#0094CE",
-                    "value": "#0094CE",
-                    "edited": false
-                },
-                "page-titlebar-backgroundColor": {
-                    "value": "#0094CE",
-                    "edited": false
-                },
-                "page-backgroundColor": {
-                    "value": "#fafafa",
-                    "edited": false
-                },
-                "page-sidebar-backgroundColor": {
-                    "value": "#ffffff",
-                    "edited": false
-                },
-                "group-textColor": {
-                    "value": "#1bbfff",
-                    "edited": false
-                },
-                "group-borderColor": {
-                    "value": "#ffffff",
-                    "edited": false
-                },
-                "group-backgroundColor": {
-                    "value": "#ffffff",
-                    "edited": false
-                },
-                "widget-textColor": {
-                    "value": "#111111",
-                    "edited": false
-                },
-                "widget-backgroundColor": {
-                    "value": "#0094ce",
-                    "edited": false
-                },
-                "widget-borderColor": {
-                    "value": "#ffffff",
-                    "edited": false
-                },
-                "base-font": {
-                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
-                }
-            },
-            "angularTheme": {
-                "primary": "indigo",
-                "accents": "blue",
-                "warn": "red",
-                "background": "grey",
-                "palette": "light"
-            }
-        },
-        "site": {
-            "name": "HeatSeekers",
-            "hideToolbar": "false",
-            "allowSwipe": "false",
-            "lockMenu": "false",
-            "allowTempTheme": "true",
-            "dateFormat": "DD/MM/YYYY",
-            "sizes": {
-                "sx": 48,
-                "sy": 48,
-                "gx": 6,
-                "gy": 6,
-                "cx": 6,
-                "cy": 6,
-                "px": 0,
-                "py": 0
-            }
-        }
-    },
-    {
-        "id": "3422d75c840ea88a",
-        "type": "mqtt-broker",
-        "name": "AWS",
-        "broker": "mqtts://a1mcw1hchqljw1-ats.iot.eu-north-1.amazonaws.com:8883",
-        "port": "8883",
-        "tls": "d20c05810a2394f0",
-        "clientid": "helloooo",
-        "autoConnect": true,
-        "usetls": true,
-        "protocolVersion": "5",
-        "keepalive": "10",
-        "cleansession": true,
-        "autoUnsubscribe": true,
-        "birthTopic": "test/testing",
-        "birthQos": "0",
-        "birthRetain": "false",
-        "birthPayload": "Heyy",
-        "birthMsg": {},
-        "closeTopic": "",
-        "closeQos": "0",
-        "closeRetain": "false",
-        "closePayload": "",
-        "closeMsg": {},
-        "willTopic": "",
-        "willQos": "0",
-        "willRetain": "false",
-        "willPayload": "",
-        "willMsg": {},
-        "userProps": "",
-        "sessionExpiry": ""
-    },
-    {
-        "id": "d20c05810a2394f0",
-        "type": "tls-config",
-        "name": "AWS Credentials",
-        "cert": "",
-        "key": "",
-        "ca": "",
-        "certname": "certificate.pem.crt",
-        "keyname": "private.pem.key",
-        "caname": "ROOTCA1.pem",
-        "servername": "",
-        "verifyservercert": false,
-        "alpnprotocol": ""
-    },
-    {
-        "id": "f906779c7da2f55c",
-        "type": "amazon config",
-        "name": "AWS",
-        "region": "eu-north-1",
-        "proxyRequired": false,
-        "proxy": ""
-    },
-    {
-        "id": "9094f05ffd0676ec",
-        "type": "mqtt-broker",
-        "name": "",
-        "broker": "localhost",
-        "port": "1883",
-        "clientid": "",
-        "autoConnect": true,
-        "usetls": false,
-        "protocolVersion": "4",
-        "keepalive": "60",
-        "cleansession": true,
-        "autoUnsubscribe": true,
-        "birthTopic": "",
-        "birthQos": "0",
-        "birthRetain": "false",
-        "birthPayload": "",
-        "birthMsg": {},
-        "closeTopic": "",
-        "closeQos": "0",
-        "closeRetain": "false",
-        "closePayload": "",
-        "closeMsg": {},
-        "willTopic": "",
-        "willQos": "0",
-        "willRetain": "false",
-        "willPayload": "",
-        "willMsg": {},
-        "userProps": "",
-        "sessionExpiry": ""
-    },
-    {
-        "id": "86337729fee18fd6",
-        "type": "ui_group",
-        "name": "Sensor",
-        "tab": "253f27cd78d6d10f",
-        "order": 8,
-        "disp": true,
-        "width": 16,
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "253f27cd78d6d10f",
-        "type": "ui_tab",
-        "name": "Home",
-        "icon": "dashboard",
-        "disabled": false,
-        "hidden": false
-    },
-    {
-        "id": "b2e536441ac3ad3c",
-        "type": "ui_group",
-        "name": "Dashboard",
-        "tab": "253f27cd78d6d10f",
-        "order": 1,
-        "disp": true,
-        "width": 17,
-        "collapse": false,
-        "className": "layout-column"
-    },
-    {
-        "id": "52c4c33378f02fb3",
-        "type": "ui_group",
-        "name": "Thermostat_Desired",
-        "tab": "253f27cd78d6d10f",
-        "order": 2,
-        "disp": true,
-        "width": 12,
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "455c22f47ce79fe6",
-        "type": "ui_group",
-        "name": "Thermostat_Cool",
-        "tab": "253f27cd78d6d10f",
-        "order": 3,
-        "disp": true,
-        "width": 12,
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "ef787416639da0bd",
-        "type": "ui_group",
-        "name": "Thermostat_Heat",
-        "tab": "253f27cd78d6d10f",
-        "order": 4,
-        "disp": true,
-        "width": 12,
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "9e6a4a7d319abe35",
-        "type": "ui_group",
-        "name": "Chart_Now",
-        "tab": "253f27cd78d6d10f",
-        "order": 5,
-        "disp": true,
-        "width": "12",
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "492e0d18830370da",
-        "type": "ui_group",
-        "name": "Chart_Today",
-        "tab": "253f27cd78d6d10f",
-        "order": 6,
-        "disp": true,
-        "width": 12,
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "fe068e52e46bb661",
-        "type": "ui_group",
-        "name": "Chart_Week",
-        "tab": "253f27cd78d6d10f",
-        "order": 7,
-        "disp": true,
-        "width": 12,
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "8efb78be170712eb",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "b2e536441ac3ad3c",
-        "order": 3,
-        "width": 7,
-        "height": 1
-    },
-    {
-        "id": "7bf5c8275d2d8176",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "b2e536441ac3ad3c",
-        "order": 4,
-        "width": 17,
-        "height": 1
-    },
-    {
-        "id": "29e1bd70b8f9aa58",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "b2e536441ac3ad3c",
-        "order": 5,
-        "width": 17,
-        "height": 1
-    },
-    {
-        "id": "63464219def972f0",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "b2e536441ac3ad3c",
-        "order": 6,
-        "width": 17,
-        "height": 1
-    },
-    {
-        "id": "f72b0d4d341228f5",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "b2e536441ac3ad3c",
-        "order": 7,
-        "width": 17,
-        "height": 1
-    },
-    {
-        "id": "2720968ac87ec56e",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "b2e536441ac3ad3c",
-        "order": 9,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "e6e0374b36f8f6a1",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "86337729fee18fd6",
-        "order": 3,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "68bcef4d3f73eb30",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "86337729fee18fd6",
-        "order": 5,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "2b49a2802b3df6b1",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "86337729fee18fd6",
-        "order": 6,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "9e67270eef590187",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "9e6a4a7d319abe35",
-        "order": 5,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "766ff91df631ec32",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "fe068e52e46bb661",
-        "order": 8,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "7ece12c6f5bf2e09",
-        "type": "ui_spacer",
-        "z": "1fc4bc11983bdd05",
-        "name": "spacer",
-        "group": "86337729fee18fd6",
-        "order": 6,
-        "width": 1,
-        "height": 1
-    },
-    {
-        "id": "dfd841427ee643ee",
-        "type": "ui-base",
-        "name": "My Dashboard",
-        "path": "/dashboard",
-        "appIcon": "",
-        "includeClientData": true,
-        "acceptsClientConfig": [
-            "ui-notification",
-            "ui-control"
-        ],
-        "showPathInSidebar": false,
-        "headerContent": "page",
-        "navigationStyle": "default",
-        "titleBarStyle": "default",
-        "showReconnectNotification": true,
-        "notificationDisplayTime": 1,
-        "showDisconnectNotification": true
-    },
-    {
-        "id": "7ecc1bb953bdd64c",
-        "type": "ui-theme",
-        "name": "Default Theme",
-        "colors": {
-            "surface": "#ffffff",
-            "primary": "#0094CE",
-            "bgPage": "#eeeeee",
-            "groupBg": "#ffffff",
-            "groupOutline": "#cccccc"
-        },
-        "sizes": {
-            "density": "default",
-            "pagePadding": "12px",
-            "groupGap": "12px",
-            "groupBorderRadius": "4px",
-            "widgetGap": "12px"
-        }
-    },
-    {
-        "id": "5351f09f06fcc11b",
-        "type": "ui-page",
-        "name": "Home",
-        "ui": "dfd841427ee643ee",
-        "path": "/page1",
-        "icon": "home",
-        "layout": "grid",
-        "theme": "7ecc1bb953bdd64c",
-        "breakpoints": [
-            {
-                "name": "Default",
-                "px": "0",
-                "cols": "3"
-            },
-            {
-                "name": "Tablet",
-                "px": "576",
-                "cols": "6"
-            },
-            {
-                "name": "Small Desktop",
-                "px": "768",
-                "cols": "9"
-            },
-            {
-                "name": "Desktop",
-                "px": "1024",
-                "cols": "12"
-            }
-        ],
-        "order": 1,
-        "className": "",
-        "visible": "true",
-        "disabled": "false"
-    },
-    {
-        "id": "d59436f62bb61fc4",
-        "type": "ui-group",
-        "name": "Dashboard",
-        "page": "5351f09f06fcc11b",
-        "width": 7,
-        "height": "1",
-        "order": 1,
-        "showTitle": true,
-        "className": "",
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
-    },
-    {
-        "id": "e31307446bbd3d85",
-        "type": "ui-group",
-        "name": "Sensor",
-        "page": "5351f09f06fcc11b",
-        "width": 4,
-        "height": "1",
-        "order": 2,
-        "showTitle": true,
-        "className": "",
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
-    },
-    {
-        "id": "67933cd816f20ce3",
-        "type": "ui-group",
-        "name": "Chart_Live",
-        "page": "5351f09f06fcc11b",
-        "width": "7",
-        "height": "1",
-        "order": 3,
-        "showTitle": true,
-        "className": "",
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
-    },
-    {
-        "id": "37702d7e11e373cb",
-        "type": "ui-group",
-        "name": "Chart_Today",
-        "page": "5351f09f06fcc11b",
-        "width": "7",
-        "height": "1",
-        "order": 5,
-        "showTitle": true,
-        "className": "",
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
-    },
-    {
-        "id": "54091d28f533ac24",
-        "type": "ui-group",
-        "name": "Chart_Week",
-        "page": "5351f09f06fcc11b",
-        "width": "7",
-        "height": "1",
-        "order": 4,
-        "showTitle": true,
-        "className": "",
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
-    },
-    {
-        "id": "b429518aee48a6fb",
-        "type": "ui-group",
-        "name": "Chart Examples",
-        "page": "d0621b8f20aee671",
-        "width": "6",
-        "height": "1",
-        "order": 1,
-        "showTitle": true,
-        "className": "",
-        "visible": "true",
-        "disabled": "false"
-    },
-    {
-        "id": "d0621b8f20aee671",
-        "type": "ui-page",
-        "name": "Charts",
-        "ui": "dfd841427ee643ee",
-        "path": "/charts",
-        "icon": "home",
-        "layout": "notebook",
-        "theme": "5075a7d8e4947586",
-        "order": 2,
-        "className": "",
-        "visible": "true",
-        "disabled": "false"
-    },
-    {
-        "id": "5075a7d8e4947586",
-        "type": "ui-theme",
-        "name": "Default Theme",
-        "colors": {
-            "surface": "#ffffff",
-            "primary": "#0094CE",
-            "bgPage": "#eeeeee",
-            "groupBg": "#ffffff",
-            "groupOutline": "#cccccc"
-        },
-        "sizes": {
-            "pagePadding": "12px",
-            "groupGap": "12px",
-            "groupBorderRadius": "4px",
-            "widgetGap": "12px"
-        }
-    },
-    {
-        "id": "9c0ffb6e805bba2f",
-        "type": "ui-group",
-        "name": "Temperature_Desired",
-        "page": "5351f09f06fcc11b",
-        "width": "4",
-        "height": "1",
-        "order": 6,
-        "showTitle": true,
-        "className": "",
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
-    },
-    {
-        "id": "02eb94a3f9ead375",
-        "type": "ui-group",
-        "name": "Temperature_Heat",
-        "page": "5351f09f06fcc11b",
-        "width": "4",
-        "height": "1",
-        "order": 8,
-        "showTitle": true,
-        "className": "",
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
-    },
-    {
-        "id": "42e1a1e4283db9c7",
-        "type": "ui-group",
-        "name": "Temperature_Cool",
-        "page": "5351f09f06fcc11b",
-        "width": "4",
-        "height": "1",
-        "order": 7,
-        "showTitle": true,
-        "className": "",
-        "visible": "true",
-        "disabled": "false",
-        "groupType": "default"
-    },
-    {
-        "id": "4711706d84206ef3",
-        "type": "ui-spacer",
-        "group": "d59436f62bb61fc4",
-        "name": "spacer",
-        "order": 2,
-        "width": 7,
-        "height": 1,
-        "className": ""
-    },
-    {
-        "id": "4711796e8c04eda1",
-        "type": "ui-spacer",
-        "group": "d59436f62bb61fc4",
-        "name": "spacer",
-        "order": 4,
-        "width": 7,
-        "height": 3,
-        "className": ""
-    },
-    {
         "id": "5e1cd735ce912f35",
         "type": "mqtt in",
         "z": "1fc4bc11983bdd05",
@@ -900,38 +251,6 @@
         ]
     },
     {
-        "id": "d83ab85db07de784",
-        "type": "ui_ui_control",
-        "z": "1fc4bc11983bdd05",
-        "name": "",
-        "events": "all",
-        "x": 1960,
-        "y": 600,
-        "wires": [
-            []
-        ]
-    },
-    {
-        "id": "49a35dd169ea96c9",
-        "type": "function",
-        "z": "1fc4bc11983bdd05",
-        "name": "toggle temperature mode",
-        "func": "if (msg.payload.temperature_mode === \"AUTO\") {\n    msg.payload = {\n        \"group\": {\n            \"hide\": [\"Home_Thermostat_Cool\", \"Home_Thermostat_Heat\"],\n            \"show\": [\"Home_Thermostat_Desired\"]\n        }\n    }\n} else if (msg.payload.temperature_mode === \"COOL\") {\n    msg.payload = {\n        \"group\": {\n            \"hide\": [\"Home_Thermostat_Desired\", \"Home_Thermostat_Heat\"], \n            \"show\": [\"Home_Thermostat_Cool\"] }\n                    }\n} else if (msg.payload.temperature_mode === \"HEAT\") {\n    msg.payload = {\n        \"group\": {\n            \"hide\": [\"Home_Thermostat_Desired\", \"Home_Thermostat_Cool\"],\n            \"show\": [\"Home_Thermostat_Heat\"]\n        }\n    }\n} else if (msg.payload.temperature_mode === \"OFF\") {\n   msg.payload = {\n        \"group\": {\n            \"hide\": [\"Home_Thermostat_Desired\", \"Home_Thermostat_Cool\", \"Home_Thermostat_Heat\"],\n        }\n    }\n}\n\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1750,
-        "y": 660,
-        "wires": [
-            [
-                "d83ab85db07de784"
-            ]
-        ]
-    },
-    {
         "id": "6411dcd4088f061c",
         "type": "ui_slider",
         "z": "1fc4bc11983bdd05",
@@ -1064,8 +383,7 @@
         "y": 1000,
         "wires": [
             [
-                "d70ad3d34a4611b4",
-                "5de7ab43933720f4"
+                "d70ad3d34a4611b4"
             ]
         ]
     },
@@ -1238,27 +556,6 @@
         ]
     },
     {
-        "id": "7f44352ea17c29a6",
-        "type": "mqtt in",
-        "z": "1fc4bc11983bdd05",
-        "name": "",
-        "topic": "test/sensor_data",
-        "qos": "2",
-        "datatype": "auto-detect",
-        "broker": "9094f05ffd0676ec",
-        "nl": false,
-        "rap": true,
-        "rh": 0,
-        "inputs": 0,
-        "x": 1020,
-        "y": 660,
-        "wires": [
-            [
-                "49a35dd169ea96c9"
-            ]
-        ]
-    },
-    {
         "id": "93f5e8e8385cadd8",
         "type": "mqtt in",
         "z": "1fc4bc11983bdd05",
@@ -1293,360 +590,13 @@
         "rh": 0,
         "inputs": 0,
         "x": 1030,
-        "y": 860,
+        "y": 780,
         "wires": [
             [
                 "7a48f6fe98d83b08",
-                "a8392262bfc34009"
+                "a8392262bfc34009",
+                "c2cbcc4204a8375f"
             ]
-        ]
-    },
-    {
-        "id": "4097fc477d4f10a1",
-        "type": "ui_button",
-        "z": "1fc4bc11983bdd05",
-        "name": "Show Now Chart",
-        "group": "9e6a4a7d319abe35",
-        "order": 3,
-        "width": 4,
-        "height": 1,
-        "passthru": false,
-        "label": "Now",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "{\"chart_mode\" : \"NOW\"}",
-        "payloadType": "str",
-        "topic": "NOW",
-        "topicType": "str",
-        "x": 1370,
-        "y": 540,
-        "wires": [
-            [
-                "d8bafa0ac45b31a2"
-            ]
-        ]
-    },
-    {
-        "id": "1ba2b4f8ad46119a",
-        "type": "ui_button",
-        "z": "1fc4bc11983bdd05",
-        "name": "Show Today Chart",
-        "group": "9e6a4a7d319abe35",
-        "order": 2,
-        "width": 4,
-        "height": 1,
-        "passthru": false,
-        "label": "Today",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "",
-        "payloadType": "str",
-        "topic": "TODAY",
-        "topicType": "str",
-        "x": 1370,
-        "y": 400,
-        "wires": [
-            [
-                "5bb5e9fa22fd541c",
-                "d8bafa0ac45b31a2"
-            ]
-        ]
-    },
-    {
-        "id": "7383823ad72ed7fe",
-        "type": "mqtt out",
-        "z": "1fc4bc11983bdd05",
-        "name": "test/command OUT",
-        "topic": "test/command",
-        "qos": "",
-        "retain": "",
-        "respTopic": "",
-        "contentType": "",
-        "userProps": "",
-        "correl": "",
-        "expiry": "",
-        "broker": "9094f05ffd0676ec",
-        "x": 1970,
-        "y": 500,
-        "wires": []
-    },
-    {
-        "id": "5bb5e9fa22fd541c",
-        "type": "function",
-        "z": "1fc4bc11983bdd05",
-        "name": "get temp logs for day",
-        "func": "// msg payload should be a date in format YYYYMMDD\n\nfunction formatDateToYYYYMMDD(date) {\n    const year = date.getFullYear();\n    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed\n    const day = String(date.getDate()).padStart(2, '0');\n\n    return `${year}${month}${day}`;\n}\n\nmsg.payload = { \"command\": \"get_history\", \"value\": formatDateToYYYYMMDD(new Date()) }\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1740,
-        "y": 500,
-        "wires": [
-            [
-                "7383823ad72ed7fe"
-            ]
-        ]
-    },
-    {
-        "id": "d8bafa0ac45b31a2",
-        "type": "function",
-        "z": "1fc4bc11983bdd05",
-        "name": "Toggle visible chart",
-        "func": "if (msg.topic === \"NOW\") {\n    msg.payload = {\n        \"group\": {\n            \"hide\": [\"Home_Chart_Week\", \"Home_Chart_Today\"],\n            \"show\": [\"Home_Chart_Now\"]\n        }\n    }\n} else if (msg.topic === \"TODAY\") {\n    msg.payload = {\n        \"group\": {\n            \"hide\": [\"Home_Chart_Now\", \"Home_Chart_Week\"],\n            \"show\": [\"Home_Chart_Today\"]\n        }\n    }\n} else if (msg.topic === \"WEEK\") {\n    msg.payload = {\n        \"group\": {\n            \"hide\": [\"Home_Chart_Now\", \"Home_Chart_Today\"],\n            \"show\": [\"Home_Chart_Week\"]\n        }\n    }\n}\n\n// msg.payload = {\n//     \"group\": {\n//         \"hide\": [\"Home_Chart_Week\", \"Home_Chart_Today\"],\n//         \"show\": [\"Home_Chart_Now\"]\n//     }\n// }\n\nconsole.log(msg.topic)\n\n\nreturn msg;",
-        "outputs": 1,
-        "timeout": 0,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 1730,
-        "y": 580,
-        "wires": [
-            [
-                "d83ab85db07de784"
-            ]
-        ]
-    },
-    {
-        "id": "85ce1713c65fd76f",
-        "type": "ui_button",
-        "z": "1fc4bc11983bdd05",
-        "name": "Show Week Chart",
-        "group": "9e6a4a7d319abe35",
-        "order": 4,
-        "width": 4,
-        "height": 1,
-        "passthru": false,
-        "label": "Week",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "",
-        "payloadType": "str",
-        "topic": "WEEK",
-        "topicType": "str",
-        "x": 1370,
-        "y": 260,
-        "wires": [
-            [
-                "d8bafa0ac45b31a2"
-            ]
-        ]
-    },
-    {
-        "id": "60c64cb2fc8fcb14",
-        "type": "ui_button",
-        "z": "1fc4bc11983bdd05",
-        "name": "Show Week Chart",
-        "group": "492e0d18830370da",
-        "order": 4,
-        "width": 4,
-        "height": 1,
-        "passthru": false,
-        "label": "Week",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "",
-        "payloadType": "str",
-        "topic": "WEEK",
-        "topicType": "str",
-        "x": 1370,
-        "y": 300,
-        "wires": [
-            [
-                "d8bafa0ac45b31a2"
-            ]
-        ]
-    },
-    {
-        "id": "0df99fd920d21554",
-        "type": "ui_button",
-        "z": "1fc4bc11983bdd05",
-        "name": "Show Today Chart",
-        "group": "492e0d18830370da",
-        "order": 2,
-        "width": 4,
-        "height": 1,
-        "passthru": false,
-        "label": "Today",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "",
-        "payloadType": "str",
-        "topic": "TODAY",
-        "topicType": "str",
-        "x": 1370,
-        "y": 440,
-        "wires": [
-            [
-                "5bb5e9fa22fd541c"
-            ]
-        ]
-    },
-    {
-        "id": "87a7a95fbf8457a8",
-        "type": "ui_button",
-        "z": "1fc4bc11983bdd05",
-        "name": "Show Week Chart",
-        "group": "fe068e52e46bb661",
-        "order": 4,
-        "width": 4,
-        "height": 1,
-        "passthru": false,
-        "label": "Week",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "",
-        "payloadType": "str",
-        "topic": "WEEK",
-        "topicType": "str",
-        "x": 1370,
-        "y": 340,
-        "wires": [
-            [
-                "d8bafa0ac45b31a2"
-            ]
-        ]
-    },
-    {
-        "id": "dfbade2a1532dccc",
-        "type": "ui_button",
-        "z": "1fc4bc11983bdd05",
-        "name": "Show Today Chart",
-        "group": "fe068e52e46bb661",
-        "order": 2,
-        "width": 4,
-        "height": 1,
-        "passthru": false,
-        "label": "Today",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "",
-        "payloadType": "str",
-        "topic": "TODAY",
-        "topicType": "str",
-        "x": 1370,
-        "y": 480,
-        "wires": [
-            [
-                "5bb5e9fa22fd541c"
-            ]
-        ]
-    },
-    {
-        "id": "14c7a66d73f8f00a",
-        "type": "ui_button",
-        "z": "1fc4bc11983bdd05",
-        "name": "Show Now Chart",
-        "group": "492e0d18830370da",
-        "order": 3,
-        "width": 4,
-        "height": 1,
-        "passthru": false,
-        "label": "Now",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "{\"chart_mode\" : \"NOW\"}",
-        "payloadType": "str",
-        "topic": "NOW",
-        "topicType": "str",
-        "x": 1370,
-        "y": 580,
-        "wires": [
-            [
-                "d8bafa0ac45b31a2"
-            ]
-        ]
-    },
-    {
-        "id": "fe974581b98fa92f",
-        "type": "ui_button",
-        "z": "1fc4bc11983bdd05",
-        "name": "Show Now Chart",
-        "group": "fe068e52e46bb661",
-        "order": 3,
-        "width": 4,
-        "height": 1,
-        "passthru": false,
-        "label": "Now",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "payload": "{\"chart_mode\" : \"NOW\"}",
-        "payloadType": "str",
-        "topic": "NOW",
-        "topicType": "str",
-        "x": 1370,
-        "y": 620,
-        "wires": [
-            [
-                "d8bafa0ac45b31a2"
-            ]
-        ]
-    },
-    {
-        "id": "b682ee34eebde8e5",
-        "type": "ui-button",
-        "z": "1fc4bc11983bdd05",
-        "group": "d59436f62bb61fc4",
-        "name": "",
-        "label": "button",
-        "order": 3,
-        "width": 0,
-        "height": 0,
-        "emulateClick": false,
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "",
-        "icon": "",
-        "iconPosition": "left",
-        "payload": "",
-        "payloadType": "str",
-        "topic": "topic",
-        "topicType": "msg",
-        "buttonColor": "",
-        "textColor": "",
-        "iconColor": "",
-        "enableClick": true,
-        "enablePointerdown": false,
-        "pointerdownPayload": "",
-        "pointerdownPayloadType": "str",
-        "enablePointerup": false,
-        "pointerupPayload": "",
-        "pointerupPayloadType": "str",
-        "x": 770,
-        "y": 220,
-        "wires": [
-            []
         ]
     },
     {
@@ -1941,77 +891,16 @@
         ],
         "topic": "topic",
         "topicType": "msg",
-        "x": 1750,
-        "y": 720,
+        "x": 970,
+        "y": 400,
         "wires": [
             [
                 "658455ae7d6044cc",
                 "bccfd27fda1c2aaf",
                 "7efb5b051eec5f8a",
-                "0129f5a1de3245a7"
+                "0129f5a1de3245a7",
+                "8fc7429680ec180d"
             ]
-        ]
-    },
-    {
-        "id": "5de7ab43933720f4",
-        "type": "ui-chart",
-        "z": "1fc4bc11983bdd05",
-        "group": "54091d28f533ac24",
-        "name": "",
-        "label": "Week",
-        "order": 2,
-        "chartType": "line",
-        "category": "topic",
-        "categoryType": "msg",
-        "xAxisLabel": "",
-        "xAxisProperty": "",
-        "xAxisPropertyType": "timestamp",
-        "xAxisType": "time",
-        "xAxisFormat": "",
-        "xAxisFormatType": "auto",
-        "xmin": "",
-        "xmax": "",
-        "yAxisLabel": "",
-        "yAxisProperty": "payload",
-        "yAxisPropertyType": "msg",
-        "ymin": "",
-        "ymax": "",
-        "bins": 10,
-        "action": "append",
-        "stackSeries": false,
-        "pointShape": "circle",
-        "pointRadius": 4,
-        "showLegend": true,
-        "removeOlder": 1,
-        "removeOlderUnit": "3600",
-        "removeOlderPoints": "",
-        "colors": [
-            "#0095ff",
-            "#ff0000",
-            "#ff7f0e",
-            "#2ca02c",
-            "#a347e1",
-            "#d62728",
-            "#ff9896",
-            "#9467bd",
-            "#c5b0d5"
-        ],
-        "textColor": [
-            "#666666"
-        ],
-        "textColorDefault": true,
-        "gridColor": [
-            "#e5e5e5"
-        ],
-        "gridColorDefault": true,
-        "width": 7,
-        "height": 8,
-        "className": "",
-        "interpolation": "linear",
-        "x": 1450,
-        "y": 1000,
-        "wires": [
-            []
         ]
     },
     {
@@ -2026,8 +915,8 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 2060,
-        "y": 760,
+        "x": 1280,
+        "y": 440,
         "wires": []
     },
     {
@@ -2042,8 +931,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2250,
-        "y": 680,
+        "x": 1470,
+        "y": 360,
         "wires": [
             [
                 "bd35b453af17ff0c"
@@ -2089,13 +978,14 @@
         ],
         "topic": "topic",
         "topicType": "msg",
-        "x": 1750,
-        "y": 780,
+        "x": 970,
+        "y": 460,
         "wires": [
             [
                 "bccfd27fda1c2aaf",
                 "7efb5b051eec5f8a",
-                "0129f5a1de3245a7"
+                "0129f5a1de3245a7",
+                "8fc7429680ec180d"
             ]
         ]
     },
@@ -2138,13 +1028,14 @@
         ],
         "topic": "topic",
         "topicType": "msg",
-        "x": 1750,
-        "y": 840,
+        "x": 970,
+        "y": 520,
         "wires": [
             [
                 "bccfd27fda1c2aaf",
                 "7efb5b051eec5f8a",
-                "0129f5a1de3245a7"
+                "0129f5a1de3245a7",
+                "8fc7429680ec180d"
             ]
         ]
     },
@@ -2160,8 +1051,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 1750,
-        "y": 900,
+        "x": 970,
+        "y": 580,
         "wires": [
             [
                 "94c273026fdd5fbf",
@@ -2187,8 +1078,8 @@
         "checkall": "true",
         "repair": false,
         "outputs": 1,
-        "x": 2060,
-        "y": 820,
+        "x": 1280,
+        "y": 500,
         "wires": [
             [
                 "aa5995588b80eba4"
@@ -2207,8 +1098,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 2240,
-        "y": 820,
+        "x": 1460,
+        "y": 500,
         "wires": [
             [
                 "d27bcfbe3586803d"
@@ -2229,8 +1120,8 @@
         "correl": "",
         "expiry": "",
         "broker": "9094f05ffd0676ec",
-        "x": 2450,
-        "y": 820,
+        "x": 1670,
+        "y": 500,
         "wires": []
     },
     {
@@ -2246,7 +1137,7 @@
         "finalize": "",
         "libs": [],
         "x": 1270,
-        "y": 860,
+        "y": 780,
         "wires": [
             [
                 "31195eebfb4a59b8",
@@ -2311,7 +1202,7 @@
         "className": "",
         "interpolation": "linear",
         "x": 1450,
-        "y": 860,
+        "y": 780,
         "wires": [
             []
         ]
@@ -2553,8 +1444,8 @@
         "name": "",
         "ui": "dfd841427ee643ee",
         "events": "all",
-        "x": 2480,
-        "y": 680,
+        "x": 1700,
+        "y": 360,
         "wires": [
             []
         ]
@@ -2806,7 +1697,575 @@
         "statusVal": "",
         "statusType": "auto",
         "x": 1280,
-        "y": 780,
+        "y": 680,
         "wires": []
+    },
+    {
+        "id": "c2cbcc4204a8375f",
+        "type": "function",
+        "z": "1fc4bc11983bdd05",
+        "name": "Format Week Data",
+        "func": "function convertTemperatureLogsToSeries(logs) {\n    let series = [];\n    for (let date in logs) {\n        logs[date].forEach(log => {\n            const xval = new Date(`${date.slice(0, 4)}-${date.slice(4, 6)}-${date.slice(6, 8)} ${log.timestamp}`);\n\n            series.push({\n                \"x\": xval.toISOString(),\n                \"y\": log.temperature\n            });\n        });\n    }\n    return series;\n}\n\n// {\n// '20250209': [\n//         {\n//             'timestamp': '15:09:23',\n//             'temperature': 24.74,\n//             'humidity': 40.08,\n//             'units': {'temperature': 'C', 'humidity': '%'}\n//         },\n\n//     ],\n//     '20250210': [\n//         {\n//             'timestamp': '15:11:59',\n//             'temperature': 15.28,\n//             'humidity': 51.23,\n//             'units': {'temperature': 'C', 'humidity': '%'}\n//         },\n\n//     ],\n// }\n\nif (msg.payload.command === \"get_history\") {\n    msg.payload = convertTemperatureLogsToSeries(JSON.parse(msg.payload.response));\n    msg.topic = \"temperature\";\n\n    return msg;\n}",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1270,
+        "y": 860,
+        "wires": [
+            [
+                "a8392262bfc34009",
+                "ffc7e0b3b1d6c20c"
+            ]
+        ]
+    },
+    {
+        "id": "ffc7e0b3b1d6c20c",
+        "type": "ui-chart",
+        "z": "1fc4bc11983bdd05",
+        "group": "54091d28f533ac24",
+        "name": "Week",
+        "label": "Week",
+        "order": 2,
+        "chartType": "line",
+        "category": "topic",
+        "categoryType": "msg",
+        "xAxisLabel": "Time",
+        "xAxisProperty": "x",
+        "xAxisPropertyType": "property",
+        "xAxisType": "time",
+        "xAxisFormat": "",
+        "xAxisFormatType": "auto",
+        "xmin": "",
+        "xmax": "",
+        "yAxisLabel": "Temperature",
+        "yAxisProperty": "y",
+        "yAxisPropertyType": "property",
+        "ymin": "0",
+        "ymax": "50",
+        "bins": "",
+        "action": "replace",
+        "stackSeries": false,
+        "pointShape": "circle",
+        "pointRadius": 4,
+        "showLegend": true,
+        "removeOlder": "4",
+        "removeOlderUnit": "604800",
+        "removeOlderPoints": "1000",
+        "colors": [
+            "#1f77b4",
+            "#ff0000",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "textColor": [
+            "#666666"
+        ],
+        "textColorDefault": true,
+        "gridColor": [
+            "#e5e5e5"
+        ],
+        "gridColorDefault": true,
+        "width": 7,
+        "height": 8,
+        "className": "",
+        "interpolation": "linear",
+        "x": 1450,
+        "y": 860,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8fc7429680ec180d",
+        "type": "switch",
+        "z": "1fc4bc11983bdd05",
+        "name": "get week",
+        "property": "payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "WEEK",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 1280,
+        "y": 580,
+        "wires": [
+            [
+                "8d96fae1cb38d1d8"
+            ]
+        ]
+    },
+    {
+        "id": "8d96fae1cb38d1d8",
+        "type": "function",
+        "z": "1fc4bc11983bdd05",
+        "name": "get temp logs for Week",
+        "func": "// msg payload should be a date in format YYYYMMDD\n\nfunction formatDateToYYYYMMDD(date) {\n    const year = date.getFullYear();\n    const month = String(date.getMonth() + 1).padStart(2, '0'); // Months are zero-indexed\n    const day = String(date.getDate()).padStart(2, '0');\n\n    return `${year}${month}${day}`;\n}\n\nconst today = new Date()\nconst weekAgo = new Date()\nweekAgo.setDate(today.getDate() - 7)\n\nmsg.payload = { \n    \"command\": \"get_history\", \n    \"value\": {\n        \"start\": formatDateToYYYYMMDD(weekAgo), \n        \"end\": formatDateToYYYYMMDD(today)\n        } \n    }\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 1470,
+        "y": 580,
+        "wires": [
+            [
+                "5bfac6d437da005a"
+            ]
+        ]
+    },
+    {
+        "id": "5bfac6d437da005a",
+        "type": "mqtt out",
+        "z": "1fc4bc11983bdd05",
+        "name": "test/command OUT",
+        "topic": "test/command",
+        "qos": "",
+        "retain": "",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "9094f05ffd0676ec",
+        "x": 1710,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "8efb78be170712eb",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "b2e536441ac3ad3c",
+        "order": 3,
+        "width": 7,
+        "height": 1
+    },
+    {
+        "id": "7bf5c8275d2d8176",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "b2e536441ac3ad3c",
+        "order": 4,
+        "width": 17,
+        "height": 1
+    },
+    {
+        "id": "29e1bd70b8f9aa58",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "b2e536441ac3ad3c",
+        "order": 5,
+        "width": 17,
+        "height": 1
+    },
+    {
+        "id": "63464219def972f0",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "b2e536441ac3ad3c",
+        "order": 6,
+        "width": 17,
+        "height": 1
+    },
+    {
+        "id": "f72b0d4d341228f5",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "b2e536441ac3ad3c",
+        "order": 7,
+        "width": 17,
+        "height": 1
+    },
+    {
+        "id": "2720968ac87ec56e",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "b2e536441ac3ad3c",
+        "order": 9,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "e6e0374b36f8f6a1",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "86337729fee18fd6",
+        "order": 3,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "68bcef4d3f73eb30",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "86337729fee18fd6",
+        "order": 5,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "2b49a2802b3df6b1",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "86337729fee18fd6",
+        "order": 6,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "9e67270eef590187",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "9e6a4a7d319abe35",
+        "order": 5,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "766ff91df631ec32",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "fe068e52e46bb661",
+        "order": 8,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "7ece12c6f5bf2e09",
+        "type": "ui_spacer",
+        "z": "1fc4bc11983bdd05",
+        "name": "spacer",
+        "group": "86337729fee18fd6",
+        "order": 6,
+        "width": 1,
+        "height": 1
+    },
+    {
+        "id": "9094f05ffd0676ec",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "localhost",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "autoUnsubscribe": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthRetain": "false",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closeRetain": "false",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willRetain": "false",
+        "willPayload": "",
+        "willMsg": {},
+        "userProps": "",
+        "sessionExpiry": ""
+    },
+    {
+        "id": "b2e536441ac3ad3c",
+        "type": "ui_group",
+        "name": "Dashboard",
+        "tab": "253f27cd78d6d10f",
+        "order": 1,
+        "disp": true,
+        "width": 17,
+        "collapse": false,
+        "className": "layout-column"
+    },
+    {
+        "id": "52c4c33378f02fb3",
+        "type": "ui_group",
+        "name": "Thermostat_Desired",
+        "tab": "253f27cd78d6d10f",
+        "order": 2,
+        "disp": true,
+        "width": 12,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "455c22f47ce79fe6",
+        "type": "ui_group",
+        "name": "Thermostat_Cool",
+        "tab": "253f27cd78d6d10f",
+        "order": 3,
+        "disp": true,
+        "width": 12,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "ef787416639da0bd",
+        "type": "ui_group",
+        "name": "Thermostat_Heat",
+        "tab": "253f27cd78d6d10f",
+        "order": 4,
+        "disp": true,
+        "width": 12,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "e31307446bbd3d85",
+        "type": "ui-group",
+        "name": "Sensor",
+        "page": "5351f09f06fcc11b",
+        "width": 4,
+        "height": "1",
+        "order": 2,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "67933cd816f20ce3",
+        "type": "ui-group",
+        "name": "Chart_Live",
+        "page": "5351f09f06fcc11b",
+        "width": "7",
+        "height": "1",
+        "order": 3,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "37702d7e11e373cb",
+        "type": "ui-group",
+        "name": "Chart_Today",
+        "page": "5351f09f06fcc11b",
+        "width": "7",
+        "height": "1",
+        "order": 5,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "54091d28f533ac24",
+        "type": "ui-group",
+        "name": "Chart_Week",
+        "page": "5351f09f06fcc11b",
+        "width": "7",
+        "height": "1",
+        "order": 4,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "d59436f62bb61fc4",
+        "type": "ui-group",
+        "name": "Dashboard",
+        "page": "5351f09f06fcc11b",
+        "width": 7,
+        "height": "1",
+        "order": 1,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "9c0ffb6e805bba2f",
+        "type": "ui-group",
+        "name": "Temperature_Desired",
+        "page": "5351f09f06fcc11b",
+        "width": "4",
+        "height": "1",
+        "order": 6,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "dfd841427ee643ee",
+        "type": "ui-base",
+        "name": "My Dashboard",
+        "path": "/dashboard",
+        "appIcon": "",
+        "includeClientData": true,
+        "acceptsClientConfig": [
+            "ui-notification",
+            "ui-control"
+        ],
+        "showPathInSidebar": false,
+        "headerContent": "page",
+        "navigationStyle": "default",
+        "titleBarStyle": "default",
+        "showReconnectNotification": true,
+        "notificationDisplayTime": 1,
+        "showDisconnectNotification": true
+    },
+    {
+        "id": "02eb94a3f9ead375",
+        "type": "ui-group",
+        "name": "Temperature_Heat",
+        "page": "5351f09f06fcc11b",
+        "width": "4",
+        "height": "1",
+        "order": 8,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "42e1a1e4283db9c7",
+        "type": "ui-group",
+        "name": "Temperature_Cool",
+        "page": "5351f09f06fcc11b",
+        "width": "4",
+        "height": "1",
+        "order": 7,
+        "showTitle": true,
+        "className": "",
+        "visible": "true",
+        "disabled": "false",
+        "groupType": "default"
+    },
+    {
+        "id": "86337729fee18fd6",
+        "type": "ui_group",
+        "name": "Sensor",
+        "tab": "253f27cd78d6d10f",
+        "order": 8,
+        "disp": true,
+        "width": 16,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "9e6a4a7d319abe35",
+        "type": "ui_group",
+        "name": "Chart_Now",
+        "tab": "253f27cd78d6d10f",
+        "order": 5,
+        "disp": true,
+        "width": "12",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "fe068e52e46bb661",
+        "type": "ui_group",
+        "name": "Chart_Week",
+        "tab": "253f27cd78d6d10f",
+        "order": 7,
+        "disp": true,
+        "width": 12,
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "253f27cd78d6d10f",
+        "type": "ui_tab",
+        "name": "Home",
+        "icon": "dashboard",
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "5351f09f06fcc11b",
+        "type": "ui-page",
+        "name": "Home",
+        "ui": "dfd841427ee643ee",
+        "path": "/page1",
+        "icon": "home",
+        "layout": "grid",
+        "theme": "7ecc1bb953bdd64c",
+        "breakpoints": [
+            {
+                "name": "Default",
+                "px": "0",
+                "cols": "3"
+            },
+            {
+                "name": "Tablet",
+                "px": "576",
+                "cols": "6"
+            },
+            {
+                "name": "Small Desktop",
+                "px": "768",
+                "cols": "9"
+            },
+            {
+                "name": "Desktop",
+                "px": "1024",
+                "cols": "12"
+            }
+        ],
+        "order": 1,
+        "className": "",
+        "visible": "true",
+        "disabled": "false"
+    },
+    {
+        "id": "7ecc1bb953bdd64c",
+        "type": "ui-theme",
+        "name": "Default Theme",
+        "colors": {
+            "surface": "#ffffff",
+            "primary": "#0094CE",
+            "bgPage": "#eeeeee",
+            "groupBg": "#ffffff",
+            "groupOutline": "#cccccc"
+        },
+        "sizes": {
+            "density": "default",
+            "pagePadding": "12px",
+            "groupGap": "12px",
+            "groupBorderRadius": "4px",
+            "widgetGap": "12px"
+        }
     }
 ]
